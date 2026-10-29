@@ -524,19 +524,40 @@ server.listen(PORT, () => {
 
 // ============================================================================
 // 24/7 KEEP-ALIVE SYSTEM FOR RENDER / CLOUD HOSTING
-// Automatically pings the server every 10 minutes to prevent Render free-tier sleep
+// Automatically pings the server every 3.5 minutes to prevent Render free-tier sleep
 // ============================================================================
-const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL || "https://turbo-kart-7e0n.onrender.com";
+const KEEP_ALIVE_URL = process.env.RENDER_EXTERNAL_URL ||
+  (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : "") ||
+  "https://turbo-kart-7e0n.onrender.com";
 
-setInterval(() => {
+function pingKeepAlive() {
   try {
     const pingTarget = `${KEEP_ALIVE_URL.replace(/\/$/, "")}/status`;
     const httpLib = pingTarget.startsWith("https") ? require("https") : require("http");
-    httpLib.get(pingTarget, (res) => {
+    const req = httpLib.get(pingTarget, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TurboKartKeepAlive/2.0",
+        "Accept": "application/json"
+      },
+      timeout: 15000
+    }, (res) => {
       console.log(`[KeepAlive] 24/7 Ping sent to ${pingTarget} - Status: ${res.statusCode}`);
-    }).on("error", (err) => {
+      res.resume();
+    });
+    req.on("error", (err) => {
       console.log(`[KeepAlive] Ping notice: ${err.message}`);
     });
-  } catch (e) {}
-}, 10 * 60 * 1000); // Every 10 minutes (Render sleeps after 15 minutes of inactivity)
+    req.on("timeout", () => {
+      req.destroy();
+    });
+  } catch (e) {
+    console.warn("[KeepAlive] Exception during ping:", e.message);
+  }
+}
+
+// Initial warm-up ping 20 seconds after server launch
+setTimeout(pingKeepAlive, 20000);
+
+// Continuous recurring ping every 3.5 minutes (210,000 ms, well below Render's 15-minute sleep threshold)
+setInterval(pingKeepAlive, 3.5 * 60 * 1000);
 

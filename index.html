@@ -7439,6 +7439,9 @@
         this.lastPingSent = 0;
         this.connectTimeout = null;
         this.pingInterval = null;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 6;
+        this.reconnectTimer = null;
       }
 
       getServerUrl(customUrl) {
@@ -7480,6 +7483,7 @@
         }
         if (this.pingInterval) clearInterval(this.pingInterval);
         if (this.connectTimeout) clearTimeout(this.connectTimeout);
+        if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
 
         const url = this.getServerUrl(customUrl);
         this.updateStatusUI("Connecting...", "#38bdf8");
@@ -7489,12 +7493,18 @@
           input.value = url;
         }
 
-        // Fast fallback timer: if no connection in 2.5s, report Offline so user is never stuck on 'Checking...'
+        // Fire background HTTP ping to warm up sleeping Render instances
+        try {
+          const httpWarmUrl = url.replace(/^wss:\/\//i, "https://").replace(/^ws:\/\//i, "http://");
+          fetch(`${httpWarmUrl}/status`, { cache: "no-store", mode: "cors" }).catch(() => {});
+        } catch (e) {}
+
+        // Friendly progressive status updates during server spin-up
         this.connectTimeout = setTimeout(() => {
           if (!this.connected) {
-            this.updateStatusUI("Offline (Local / AI Mode)", "#f59e0b");
+            this.updateStatusUI("Waking Server...", "#fbbf24");
           }
-        }, 2500);
+        }, 3000);
 
         try {
           this.ws = new WebSocket(url);
@@ -7502,6 +7512,7 @@
           this.ws.onopen = () => {
             clearTimeout(this.connectTimeout);
             this.connected = true;
+            this.reconnectAttempts = 0;
             this.updateStatusUI("Connected (Online)", "#10b981");
             this.startPingLoop();
 
@@ -7532,18 +7543,33 @@
           this.ws.onerror = () => {
             clearTimeout(this.connectTimeout);
             this.connected = false;
-            this.updateStatusUI("Offline (Local / AI Mode)", "#f59e0b");
+            this.handleDisconnect(customUrl);
           };
 
           this.ws.onclose = () => {
             clearTimeout(this.connectTimeout);
             this.connected = false;
-            this.updateStatusUI("Offline (Local / AI Mode)", "#f59e0b");
+            this.handleDisconnect(customUrl);
           };
         } catch (e) {
           clearTimeout(this.connectTimeout);
           this.connected = false;
-          this.updateStatusUI("Offline (Local / AI Mode)", "#f59e0b");
+          this.handleDisconnect(customUrl);
+        }
+      }
+
+      handleDisconnect(customUrl) {
+        if (this.connected) return;
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.reconnectAttempts++;
+          const delay = Math.min(1500 * Math.pow(1.4, this.reconnectAttempts), 8000);
+          this.updateStatusUI(`Waking server (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`, "#fbbf24");
+          if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+          this.reconnectTimer = setTimeout(() => {
+            this.connect(customUrl);
+          }, delay);
+        } else {
+          this.updateStatusUI("Offline (Local / AI Mode)", "#94a3b8");
         }
       }
 
@@ -7665,6 +7691,14 @@
 
     const net = new NetworkClient();
     net.connect();
+
+    // Client-side keep-alive: ping the status endpoint every 3 minutes while game is open to keep Render backend warm
+    setInterval(() => {
+      try {
+        const warmUrl = net.getServerUrl().replace(/^wss:\/\//i, "https://").replace(/^ws:\/\//i, "http://");
+        fetch(`${warmUrl}/status`, { cache: "no-store", mode: "cors" }).catch(() => {});
+      } catch (e) {}
+    }, 3 * 60 * 1000);
 
     /* ==========================================================================
        AUTHENTIC SMASH KARTS RANDOM PLAYER POOL (Bot Simulation Pool)
