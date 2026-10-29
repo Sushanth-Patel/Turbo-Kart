@@ -32,6 +32,19 @@ function sendJson(res, statusCode, data) {
   res.end(JSON.stringify(data));
 }
 
+// Resilient WebSocket send helper with active connection check and error trapping
+function safeWsSend(ws, data) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return false;
+  try {
+    const raw = typeof data === "string" ? data : JSON.stringify(data);
+    ws.send(raw);
+    return true;
+  } catch (err) {
+    console.warn("safeWsSend warning:", err.message);
+    return false;
+  }
+}
+
 // HTTP Server for serving index.html, admin.html, API endpoints, and static assets
 const server = http.createServer(async (req, res) => {
   const urlObj = new URL(req.url, `http://${req.headers.host || "localhost"}`);
@@ -207,8 +220,8 @@ class Room {
   broadcast(message, excludeId = null) {
     const raw = typeof message === "string" ? message : JSON.stringify(message);
     this.players.forEach((client, id) => {
-      if (id !== excludeId && client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(raw);
+      if (id !== excludeId && client.ws) {
+        safeWsSend(client.ws, raw);
       }
     });
   }
@@ -334,7 +347,7 @@ wss.on("connection", (ws) => {
     score: 0
   };
 
-  ws.send(JSON.stringify({ type: "WELCOME", clientId }));
+  safeWsSend(ws, { type: "WELCOME", clientId });
 
   ws.on("message", (raw) => {
     try {
@@ -353,14 +366,14 @@ wss.on("connection", (ws) => {
           Object.assign(client, msg.playerData || {});
           room.players.set(clientId, client);
 
-          ws.send(JSON.stringify({
+          safeWsSend(ws, {
             type: "ROOM_JOINED",
             roomCode: code,
             isHost: true,
             mapId: room.mapId,
             maxPlayers: room.maxPlayers,
             players: Array.from(room.players.values()).map(p => ({ id: p.id, name: p.name, color: p.color }))
-          }));
+          });
           break;
         }
 
@@ -379,24 +392,24 @@ wss.on("connection", (ws) => {
           const code = (msg.roomCode || "").toUpperCase().trim();
           const room = rooms.get(code);
           if (!room) {
-            return ws.send(JSON.stringify({ type: "ERROR", message: "Room not found!" }));
+            return safeWsSend(ws, { type: "ERROR", message: "Room not found!" });
           }
           if (room.players.size >= room.maxPlayers) {
-            return ws.send(JSON.stringify({ type: "ERROR", message: "Room is full!" }));
+            return safeWsSend(ws, { type: "ERROR", message: "Room is full!" });
           }
 
           currentRoom = room;
           Object.assign(client, msg.playerData || {});
           room.players.set(clientId, client);
 
-          ws.send(JSON.stringify({
+          safeWsSend(ws, {
             type: "ROOM_JOINED",
             roomCode: code,
             isHost: room.hostId === clientId,
             mapId: room.mapId,
             maxPlayers: room.maxPlayers,
             players: Array.from(room.players.values()).map(p => ({ id: p.id, name: p.name, color: p.color }))
-          }));
+          });
 
           room.broadcast({
             type: "PLAYER_JOINED",
@@ -471,7 +484,7 @@ wss.on("connection", (ws) => {
         }
 
         case "PING": {
-          ws.send(JSON.stringify({ type: "PONG", timestamp: msg.timestamp }));
+          safeWsSend(ws, { type: "PONG", timestamp: msg.timestamp });
           break;
         }
       }
@@ -493,8 +506,8 @@ wss.on("connection", (ws) => {
         const nextHost = currentRoom.players.keys().next().value;
         currentRoom.hostId = nextHost;
         const newHostClient = currentRoom.players.get(nextHost);
-        if (newHostClient) {
-          newHostClient.ws.send(JSON.stringify({ type: "HOST_PROMOTED" }));
+        if (newHostClient && newHostClient.ws) {
+          safeWsSend(newHostClient.ws, { type: "HOST_PROMOTED" });
         }
       }
     }

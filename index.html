@@ -3540,6 +3540,9 @@
             <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
           </span>
         </button>
+        <button id="menuAudioBtn" class="turbo-header-btn turbo-audio-btn" title="Toggle Sound FX & Engine" aria-label="Toggle Sound">
+          <span class="turbo-btn-icon-svg" style="font-size: 14px;">🔊</span>
+        </button>
         <button id="menuFullscreenBtn" class="turbo-header-btn turbo-fs-btn" title="Toggle Landscape Fullscreen" aria-label="Toggle Fullscreen">
           <span class="turbo-btn-icon-svg" style="font-size: 15px; font-weight: 900;">⛶</span>
         </button>
@@ -3663,6 +3666,18 @@
           <span class="turbo-card-chevron-svg">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
           </span>
+        </button>
+
+        <!-- Daily Gift Button -->
+        <button id="giftBtn" class="turbo-action-card turbo-gift-card" title="Claim Free Daily Coins">
+          <div class="turbo-action-left">
+            <span class="turbo-card-icon-svg" style="font-size: 16px;">🎁</span>
+            <div class="turbo-signin-text">
+              <span class="turbo-signin-title" style="color: #fbbf24;">Daily Gift</span>
+              <span class="turbo-signin-sub">+50 Free Coins!</span>
+            </div>
+          </div>
+          <span class="badge-new-pill" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-size: 9px; font-weight: 900; padding: 2px 7px; border-radius: 999px;">FREE</span>
         </button>
 
         <!-- Friends Card -->
@@ -5638,7 +5653,7 @@
         createRectangularLavaPit(70, 70, 38, 24);
       }
 
-      const gmLbl = document.getElementById("gameModeLabel");
+      const gmLbl = document.getElementById("lobbyArenaName");
       if (gmLbl) gmLbl.textContent = mapConf.name;
     }
 
@@ -7983,7 +7998,7 @@
       const nameEl = document.getElementById("weaponName");
       const ammoEl = document.getElementById("weaponAmmo");
       const slotEl = document.getElementById("weaponSlot");
-      const touchAttackEl = document.getElementById("touchAttack") || document.getElementById("touchFire");
+      const touchAttackEl = document.getElementById("touchAttack");
 
       if (player && player.currentWeapon) {
         if (iconEl) iconEl.textContent = player.currentWeapon.icon;
@@ -8567,7 +8582,7 @@
       });
 
       // Attack / Fire Weapon Button
-      const attackBtn = document.getElementById("touchAttack") || document.getElementById("touchFire");
+      const attackBtn = document.getElementById("touchAttack");
       bindSimpleTouch(attackBtn, () => {
         triggerPlayerAttack();
         if (navigator.vibrate) navigator.vibrate(25);
@@ -9544,11 +9559,6 @@
       const cur = config.data.selectedMap || "stadium";
       const conf = MAP_CONFIGS[cur] || MAP_CONFIGS.stadium;
       const icon = MAP_ICONS[cur] || "🏟️";
-
-      const mIcon = document.getElementById("autoArenaIcon");
-      const mName = document.getElementById("autoArenaName");
-      if (mIcon) mIcon.textContent = icon;
-      if (mName) mName.textContent = conf.name;
 
       const lIcon = document.getElementById("lobbyArenaIcon");
       const lName = document.getElementById("lobbyArenaName");
