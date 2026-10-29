@@ -1,0 +1,44 @@
+{
+  "trafficLogs": [
+    {
+      "id": "trf_5yhneg8fy",
+      "sessionId": "sess_mq43fn79i",
+      "timestamp": "2026-10-14T03:50:55.180Z",
+      "ipHash": "eff8e7ca50",
+      "deviceType": "Desktop",
+      "os": "Unknown OS",
+      "browser": "Unknown Browser",
+      "screen": "Unknown",
+      "referrer": "Direct",
+      "page": "/",
+      "durationSec": 1
+    },
+    {
+      "id": "trf_2tzaaooo3",
+      "sessionId": "sess_3w7iuyzpu",
+      "timestamp": "2026-10-14T03:50:55.181Z",
+      "ipHash": "eff8e7ca50",
+      "deviceType": "Desktop",
+      "os": "Unknown OS",
+      "browser": "Unknown Browser",
+      "screen": "Unknown",
+      "referrer": "Direct",
+      "page": "/",
+      "durationSec": 1
+    }
+  ],
+  "recentEvents": [
+    {
+      "type": "VISIT",
+      "text": "New Desktop visitor arrived (Unknown OS • Unknown Browser)",
+      "time": "2026-10-14T03:50:55.181Z",
+      "device": "Desktop"
+    },
+    {
+      "type": "VISIT",
+      "text": "New Desktop visitor arrived (Unknown OS • Unknown Browser)",
+      "time": "2026-10-14T03:50:55.180Z",
+      "device": "Desktop"
+    }
+  ]
+}

@@ -1,0 +1,2324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turbo Kart 3D - Analytics & Admin Dashboard</title>
+  <meta name="description" content="Dedicated Analytics & Admin Control Center for Turbo Smash Karts 3D. Real-time site traffic, registered players, Android, Desktop, and Other device telemetry." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --bg-card: rgba(15, 23, 42, 0.85);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(245, 158, 11, 0.3);
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --accent: #ef4444;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --purple: #8b5cf6;
+      --blue: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-glow: 0 0 25px rgba(245, 158, 11, 0.15);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 25%, rgba(245, 158, 11, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Top Navigation Header */
+    header.admin-header {
+      background: rgba(10, 16, 29, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-glass);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo-badge {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .portal-tag {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--cyan);
+      background: rgba(6, 182, 212, 0.12);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      -webkit-text-fill-color: var(--cyan);
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Header Actions & Controls */
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .live-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #34d399;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
+
+    .time-selector {
+      display: flex;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 3px;
+    }
+
+    .time-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .time-btn:hover {
+      color: #fff;
+    }
+
+    .time-btn.active {
+      background: var(--primary);
+      color: #000;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: var(--border-glass);
+      color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(51, 65, 85, 0.9);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, #ea580c 100%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    main.admin-content {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    /* KPI Summary Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--primary));
+    }
+
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+    }
+
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-glass);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 6px;
+    }
+
+    .kpi-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .trend-badge {
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+    .trend-up { color: #34d399; }
+    .trend-down { color: #f87171; }
+    .trend-neutral { color: #94a3b8; }
+
+    /* Device Pills Container in KPI */
+    .kpi-device-pills {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .device-pill {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-glass);
+    }
+
+    .device-pill span.num {
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .device-pill.android { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.06); }
+    .device-pill.android span.num { color: #34d399; }
+    .device-pill.desktop { border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.06); }
+    .device-pill.desktop span.num { color: #38bdf8; }
+    .device-pill.other { border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.06); }
+    .device-pill.other span.num { color: #c084fc; }
+
+    /* Tabbed Navigation Bar */
+    .tab-bar-wrap {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 10px 18px;
+      border-radius: 12px 12px 0 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .tab-nav-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-nav-btn.active {
+      color: #fff;
+      border-bottom-color: var(--primary);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .tab-count-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tab-nav-btn.active .tab-count-badge {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Generic Panel / Card */
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Grid Layouts for Tabs */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2col, .grid-3col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Device Hero Cards */
+    .device-hero-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1.5px solid var(--border-glass);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .device-hero-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .device-hero-card.android-card { border-color: rgba(16, 185, 129, 0.35); }
+    .device-hero-card.desktop-card { border-color: rgba(6, 182, 212, 0.35); }
+    .device-hero-card.other-card { border-color: rgba(139, 92, 246, 0.35); }
+
+    .device-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .device-tag {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .device-tag.android { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .device-tag.desktop { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .device-tag.other { background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+    .device-share-pct {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .device-count-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .device-breakdown-list {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .breakdown-row span.val {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease-out;
+    }
+
+    /* Comparison Donut Visual */
+    .device-donut-wrap {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px 0;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 200px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Interactive Timeline Chart (SVG-based) */
+    .chart-container {
+      width: 100%;
+      height: 240px;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      pointer-events: none;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+      transform: translate(-50%, -120%);
+    }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: rgba(15, 23, 42, 0.95);
+      padding: 12px 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-glass);
+      white-space: nowrap;
+    }
+
+    table.data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .player-avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7 0%, #1e40af 100%);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      border: 1.5px solid #38bdf8;
+      flex-shrink: 0;
+    }
+
+    .player-name-wrap strong {
+      display: block;
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 800;
+    }
+
+    .player-id-mono {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .status-badge.online { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .status-badge.idle { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .status-badge.offline { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+
+    /* Filter Toolbar for Players Hub */
+    .filter-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 6px 12px;
+      flex: 1;
+      min-width: 220px;
+      max-width: 380px;
+    }
+
+    .search-input-wrap input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .filter-select {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-glass);
+      color: #cbd5e1;
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Live Activity Stream */
+    .activity-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .activity-stream::-webkit-scrollbar {
+      width: 5px;
+    }
+    .activity-stream::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      font-size: 12.5px;
+      transition: background 0.15s;
+    }
+
+    .activity-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .activity-icon {
+      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+      color: #cbd5e1;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    /* Modal Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 10, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(245, 158, 11, 0.15);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      transform: scale(0.95);
+      transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary);
+    }
+
+    /* Footer */
+    footer.admin-footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 18px 24px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      header.admin-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .brand-wrap {
+        justify-content: space-between;
+      }
+      .header-controls {
+        justify-content: space-between;
+      }
+      .time-selector {
+        width: 100%;
+        justify-content: space-around;
+      }
+      .time-btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header with Brand, Real-Time Status, Time Range & Tools -->
+  <header class="admin-header">
+    <div class="brand-wrap">
+      <div class="brand-logo-badge" title="Turbo Kart Analytics">🏎️</div>
+      <div class="brand-text">
+        <h1>TURBO KART <span class="portal-tag">ANALYTICS ADMIN</span></h1>
+        <p>100% Real-Time Data • Pure Verified Telemetry</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Live Engine Pulse -->
+      <div class="live-status-pill" id="livePill" title="Real-Time Connected Sessions">
+        <span class="pulse-dot"></span>
+        <span id="liveStatusText">LIVE: <strong id="activeSessionsCount">0</strong> Active</span>
+      </div>
+
+      <!-- Time Range Filter -->
+      <div class="time-selector" role="group" aria-label="Time Filter">
+        <button class="time-btn" data-range="24h">24H</button>
+        <button class="time-btn active" data-range="7d">7D</button>
+        <button class="time-btn" data-range="30d">30D</button>
+        <button class="time-btn" data-range="all">ALL</button>
+      </div>
+
+      <!-- Refresh & Export Actions -->
+      <button class="btn btn-secondary" id="refreshBtn" title="Fetch Latest Server Telemetry">
+        <span>🔄</span> Refresh
+      </button>
+
+      <button class="btn btn-secondary" id="exportBtn" title="Export Real-Time Traffic CSV">
+        <span>📥</span> Export CSV
+      </button>
+
+      <!-- Launch Game Link -->
+      <a href="/index.html" target="_blank" class="btn btn-primary" title="Launch Game Arena in New Tab">
+        <span>🎮</span> Launch Game
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="admin-content">
+
+    <!-- KPI Summary Row -->
+    <section class="kpi-grid">
+      <!-- KPI 1: Total Site Traffic -->
+      <div class="kpi-card" style="--card-accent: #f59e0b;">
+        <div class="kpi-header">
+          <span class="kpi-title">Site Traffic</span>
+          <div class="kpi-icon" style="color: #f59e0b;">📈</div>
+        </div>
+        <div class="kpi-value" id="kpiTotalVisits">0</div>
+        <div class="kpi-meta">
+          <span id="kpiTrendWrap">
+            <span class="trend-badge trend-neutral" id="kpiTrendDelta">0%</span> vs prior period •
+          </span>
+          <span id="kpiUniqueVisitors">0</span> uniques
+        </div>
+      </div>
+
+      <!-- KPI 2: Live Active Users -->
+      <div class="kpi-card" style="--card-accent: #10b981;">
+        <div class="kpi-header">
+          <span class="kpi-title">Real-Time Traffic</span>
+          <div class="kpi-icon" style="color: #10b981;">⚡</div>
+        </div>
+        <div class="kpi-value" id="kpiActiveNow" style="color: #34d399;">0</div>
+        <div class="kpi-meta">
+          <span id="kpiActiveBreakdown">0 Android • 0 Desktop • 0 Other</span>
+        </div>
+      </div>
+
+      <!-- KPI 3: Registered Players -->
+      <div class="kpi-card" style="--card-accent: #06b6d4;">
+        <div class="kpi-header">
+          <span class="kpi-title">Registered Players</span>
+          <div class="kpi-icon" style="color: #06b6d4;">👥</div>
+        </div>
+        <div class="kpi-value" id="kpiTotalPlayers">0</div>
+        <div class="kpi-meta">
+          <span class="trend-badge trend-up" id="kpiNewPlayersToday">+0 today</span>
+          <span>•</span>
+          <span>Verified Racers</span>
+        </div>
+      </div>
+
+      <!-- KPI 4: Device Split Snapshot -->
+      <div class="kpi-card" style="--card-accent: #8b5cf6;">
+        <div class="kpi-header">
+          <span class="kpi-title">Device Breakdown</span>
+          <div class="kpi-icon" style="color: #8b5cf6;">📱</div>
+        </div>
+        <div class="kpi-device-pills">
+          <div class="device-pill android" title="Android Smartphones & Tablets">
+            <span>Android</span>
+            <span class="num" id="kpiAndroidPct">0%</span>
+          </div>
+          <div class="device-pill desktop" title="Windows, Mac & Linux Computers">
+            <span>Desktop</span>
+            <span class="num" id="kpiDesktopPct">0%</span>
+          </div>
+          <div class="device-pill other" title="iOS / iPad / Consoles / Other">
+            <span>Other</span>
+            <span class="num" id="kpiOtherPct">0%</span>
+          </div>
+        </div>
+        <div class="kpi-meta" style="margin-top: 8px;">
+          <span>Three-way cross-platform share</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabbed Navigation Bar (Separate Analytic Views) -->
+    <div class="tab-bar-wrap">
+      <nav class="tab-nav" role="tablist">
+        <button class="tab-nav-btn active" data-tab="tabTraffic" role="tab">
+          <span>📊</span> Site Traffic & Trends
+        </button>
+        <button class="tab-nav-btn" data-tab="tabDevices" role="tab">
+          <span>📱</span> Android vs Desktop vs Other
+        </button>
+        <button class="tab-nav-btn" data-tab="tabPlayers" role="tab">
+          <span>👥</span> Registered Racers
+          <span class="tab-count-badge" id="tabPlayersCount">0</span>
+        </button>
+        <button class="tab-nav-btn" data-tab="tabLiveFeed" role="tab">
+          <span>🛰️</span> Real-Time Stream
+        </button>
+      </nav>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; color:var(--text-muted); font-weight:700;">Auto-sync:</span>
+        <button id="autoSyncToggle" class="btn btn-secondary" style="padding:4px 10px; font-size:11px;">
+          <span id="autoSyncIcon">🟢</span> <span id="autoSyncText">5s</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         TAB 1: SITE TRAFFIC & ENGAGEMENT
+         ===================================================================== -->
+    <div class="tab-pane active" id="tabTraffic">
+      <div class="grid-2col">
+        <!-- Main Interactive Traffic Graph -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><span>📈</span> Site Traffic Volume Over Time</h3>
+              <p class="panel-subtitle">Total visits and device-specific distributions across time periods</p>
+            </div>
+            <div style="display:flex; gap:12px; font-size:11px; font-weight:700;">
+              <span style="color:#f59e0b; display:flex; align-items:center; gap:4px;">● Total Visits</span>
+              <span style="color:#10b981; display:flex; align-items:center; gap:4px;">● Android</span>
+              <span style="color:#06b6d4; display:flex; align-items:center; gap:4px;">● Desktop</span>
+              <span style="color:#8b5cf6; display:flex; align-items:center; gap:4px;">● Other</span>
+            </div>
+          </div>
+
+          <!-- SVG Visual Chart -->
+          <div class="chart-container" id="trafficChartBox">
+            <div class="chart-tooltip" id="chartTooltip"></div>
+            <svg class="chart-svg" id="trafficSvg" viewBox="0 0 800 220" preserveAspectRatio="none">
+              <!-- Dynamically populated from genuine logs -->
+            </svg>
+          </div>
+        </div>
+
+        <!-- Acquisition Channels & Referrers -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><span>🌐</span> Traffic Acquisition Channels</h3>
+              <p class="panel-subtitle">Incoming traffic referrers and sources</p>
+            </div>
+          </div>
+          <div id="referrerList" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Engagement & Hardware Metrics -->
+      <div class="grid-3col">
+        <!-- Session Engagement (Calculated Dynamically from Real-Time Logs) -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title"><span>⏱️</span> Session Engagement</h3>
+          </div>
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Avg Time on Site:</span><span class="val" id="metricAvgDuration">0s</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="metricAvgDurationBar" style="width: 0%; background: #f59e0b;"></div></div>
+
+            <div class="breakdown-row" style="margin-top:6px;"><span>Bounce Rate:</span><span class="val" id="metricBounceRate">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="metricBounceRateBar" style="width: 0%; background: #10b981;"></div></div>
+
+            <div class="breakdown-row" style="margin-top:6px;"><span>Traffic Health:</span><span class="val" id="metricTrafficHealth" style="color:#34d399;">Active</span></div>
+          </div>
+        </div>
+
+        <!-- Real Screen Resolutions -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title"><span>🖥️</span> Screen Resolutions</h3>
+          </div>
+          <div id="screenList" class="device-breakdown-list">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Realtime Server Engine Health -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title"><span>⚙️</span> Battle Engine Status</h3>
+          </div>
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Active Multiplayer Rooms:</span><span class="val" id="srvActiveRooms">0</span></div>
+            <div class="breakdown-row"><span>Racers In Arena:</span><span class="val" id="srvInGamePlayers">0</span></div>
+            <div class="breakdown-row"><span>Tick Rate:</span><span class="val" style="color:#10b981;">20 Hz (Synchronized)</span></div>
+            <div class="breakdown-row"><span>Server Connection:</span><span class="val" id="srvConnStatus" style="color:#34d399;">Connected</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         TAB 2: DEVICE ANALYTICS (ANDROID vs DESKTOP vs OTHER)
+         ===================================================================== -->
+    <div class="tab-pane" id="tabDevices">
+      <!-- 3 Hero Cards for Android, Desktop, and Other Devices -->
+      <div class="grid-3col" style="margin-bottom:24px;">
+        <!-- Android Card -->
+        <div class="device-hero-card android-card">
+          <div class="device-badge-row">
+            <span class="device-tag android"><span>🤖</span> Android</span>
+            <span style="font-size:22px;">📱</span>
+          </div>
+          <div class="device-share-pct" id="cardAndroidPct">0%</div>
+          <div class="device-count-sub"><span id="cardAndroidCount">0</span> Total Visits</div>
+
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Registered Racers:</span><span class="val" id="cardAndroidRacers">0</span></div>
+            <div class="breakdown-row"><span>Controls:</span><span class="val" style="color:#34d399;">Mobile Touch (Dual Thumb)</span></div>
+            <div class="breakdown-row"><span>Top Detected OS:</span><span class="val" id="cardAndroidTopOs">None</span></div>
+            <div class="breakdown-row"><span>Top Browser:</span><span class="val" id="cardAndroidTopBrowser">None</span></div>
+          </div>
+        </div>
+
+        <!-- Desktop Card -->
+        <div class="device-hero-card desktop-card">
+          <div class="device-badge-row">
+            <span class="device-tag desktop"><span>💻</span> Desktop</span>
+            <span style="font-size:22px;">🖥️</span>
+          </div>
+          <div class="device-share-pct" id="cardDesktopPct">0%</div>
+          <div class="device-count-sub"><span id="cardDesktopCount">0</span> Total Visits</div>
+
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Registered Racers:</span><span class="val" id="cardDesktopRacers">0</span></div>
+            <div class="breakdown-row"><span>Controls:</span><span class="val" style="color:#38bdf8;">WASD / Arrows + Space</span></div>
+            <div class="breakdown-row"><span>Top Detected OS:</span><span class="val" id="cardDesktopTopOs">None</span></div>
+            <div class="breakdown-row"><span>Top Browser:</span><span class="val" id="cardDesktopTopBrowser">None</span></div>
+          </div>
+        </div>
+
+        <!-- Other Devices Card -->
+        <div class="device-hero-card other-card">
+          <div class="device-badge-row">
+            <span class="device-tag other"><span>🌐</span> Other Devices</span>
+            <span style="font-size:22px;">🎮</span>
+          </div>
+          <div class="device-share-pct" id="cardOtherPct">0%</div>
+          <div class="device-count-sub"><span id="cardOtherCount">0</span> Total Visits</div>
+
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Registered Racers:</span><span class="val" id="cardOtherRacers">0</span></div>
+            <div class="breakdown-row"><span>Device Scope:</span><span class="val" style="color:#c084fc;">iOS, iPads, Consoles, TVs</span></div>
+            <div class="breakdown-row"><span>Top Detected Platform:</span><span class="val" id="cardOtherTopOs">None</span></div>
+            <div class="breakdown-row"><span>Top Browser:</span><span class="val" id="cardOtherTopBrowser">None</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut Visual & Detailed OS / Browser Breakdown -->
+      <div class="grid-2col">
+        <!-- Visual Market Share Donut Card -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><span>🥧</span> Real Device Share Distribution</h3>
+              <p class="panel-subtitle">Calculated strictly from live incoming traffic</p>
+            </div>
+          </div>
+
+          <div class="device-donut-wrap">
+            <!-- SVG Donut Chart -->
+            <svg width="180" height="180" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14" />
+              <!-- Android Circle Segment -->
+              <circle id="donutAndroid" cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="14"
+                stroke-dasharray="0 238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" style="transition: stroke-dasharray 0.5s ease;" />
+              <!-- Desktop Circle Segment -->
+              <circle id="donutDesktop" cx="50" cy="50" r="38" fill="none" stroke="#06b6d4" stroke-width="14"
+                stroke-dasharray="0 238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" style="transition: all 0.5s ease;" />
+              <!-- Other Circle Segment -->
+              <circle id="donutOther" cx="50" cy="50" r="38" fill="none" stroke="#8b5cf6" stroke-width="14"
+                stroke-dasharray="0 238.76" stroke-dashoffset="0" transform="rotate(-90 50 50)" style="transition: all 0.5s ease;" />
+              <text x="50" y="47" text-anchor="middle" font-size="10" font-weight="800" fill="#94a3b8">DEVICES</text>
+              <text x="50" y="61" text-anchor="middle" font-size="14" font-weight="900" fill="#fff" id="donutCenterTotal">0</text>
+            </svg>
+
+            <!-- Donut Legend -->
+            <div class="donut-legend">
+              <div class="legend-item">
+                <span class="legend-dot" style="background:#10b981;"></span>
+                <div style="flex:1;">
+                  <strong style="color:#fff;">Android Users</strong>
+                  <div style="font-size:11px; color:var(--text-muted);" id="legendAndroidSub">0 visits (0%)</div>
+                </div>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot" style="background:#06b6d4;"></span>
+                <div style="flex:1;">
+                  <strong style="color:#fff;">Desktop Users</strong>
+                  <div style="font-size:11px; color:var(--text-muted);" id="legendDesktopSub">0 visits (0%)</div>
+                </div>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot" style="background:#8b5cf6;"></span>
+                <div style="flex:1;">
+                  <strong style="color:#fff;">Other Devices</strong>
+                  <div style="font-size:11px; color:var(--text-muted);" id="legendOtherSub">0 visits (0%)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real Operating Systems List -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title"><span>💻</span> Operating Systems Intelligence</h3>
+              <p class="panel-subtitle">Live breakdown across Android versions, Windows, Mac, Linux, and iOS</p>
+            </div>
+          </div>
+          <div id="osDetailedList" class="device-breakdown-list">
+            <!-- Populated via JS from real logs -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Real Browser Distribution Breakdown -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h3 class="panel-title"><span>🌐</span> Browser Distribution & Engines</h3>
+          <p class="panel-subtitle">Real client browsers used to access the battle arena</p>
+        </div>
+        <div class="grid-2col" id="browserGrid">
+          <!-- Populated via JS from real logs -->
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         TAB 3: REGISTERED PLAYERS HUB
+         ===================================================================== -->
+    <div class="tab-pane" id="tabPlayers">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title"><span>👥</span> Registered Racers Directory</h3>
+            <p class="panel-subtitle">Real registered player accounts, actual match statistics, smashes, and driver ranks</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" id="openAddPlayerModalBtn">
+              <span>+</span> Register New Player
+            </button>
+            <button class="btn btn-secondary" id="exportPlayersBtn">
+              <span>📥</span> Export Players CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="filter-toolbar">
+          <div class="search-input-wrap">
+            <span>🔍</span>
+            <input type="text" id="playerSearchInput" placeholder="Search by racer name, email or ID..." />
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <!-- Device Filter -->
+            <select id="playerDeviceFilter" class="filter-select" aria-label="Filter by Device">
+              <option value="all">All Devices</option>
+              <option value="android">Android Only 🤖</option>
+              <option value="desktop">Desktop Only 💻</option>
+              <option value="other">Other Devices 📱</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="playerStatusFilter" class="filter-select" aria-label="Filter by Status">
+              <option value="all">All Statuses</option>
+              <option value="online">Online 🟢</option>
+              <option value="idle">Idle 🟡</option>
+              <option value="offline">Offline ⚪</option>
+            </select>
+
+            <!-- Sort By -->
+            <select id="playerSortBy" class="filter-select" aria-label="Sort Racers">
+              <option value="recent">Recently Registered</option>
+              <option value="score">Highest Arena Score</option>
+              <option value="smashes">Most Smashes 💥</option>
+              <option value="matches">Most Matches Played</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Players Data Table -->
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Racer Profile</th>
+                <th>Device & Platform</th>
+                <th>Matches</th>
+                <th>Smashes 💥</th>
+                <th>Score 🏆</th>
+                <th>Registered Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="playersTableBody">
+              <!-- Populated dynamically from genuine player records -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Pagination Footer -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:12px; color:var(--text-muted); flex-wrap:wrap; gap:10px;">
+          <span id="playerTableSummary">0 racers found</span>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" id="prevPageBtn" disabled>Previous</button>
+            <span id="pageIndicator" style="padding:6px 12px; font-weight:700;">Page 1</span>
+            <button class="btn btn-secondary" id="nextPageBtn" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         TAB 4: REAL-TIME LIVE ACTIVITY FEED
+         ===================================================================== -->
+    <div class="tab-pane" id="tabLiveFeed">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title"><span>🛰️</span> Real-Time Battle & Site Event Stream</h3>
+            <p class="panel-subtitle">Live events recorded as actual visitors arrive and racers battle</p>
+          </div>
+          <button class="btn btn-secondary" id="clearStreamBtn">Clear View</button>
+        </div>
+
+        <div class="activity-stream" id="activityStreamBox">
+          <!-- Real-time event items rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Player Details Modal -->
+  <div class="modal-overlay" id="playerModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalPlayerTitle">Racer Profile</h3>
+        <button class="close-btn" id="closePlayerModalBtn">&times;</button>
+      </div>
+      <div id="modalPlayerContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Player Registration Modal -->
+  <div class="modal-overlay" id="addPlayerModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Register Real Racer Account</h3>
+        <button class="close-btn" id="closeAddPlayerModalBtn">&times;</button>
+      </div>
+      <form id="addPlayerForm">
+        <div class="form-group">
+          <label>Racer Nickname *</label>
+          <input type="text" id="newUsername" placeholder="e.g. TurboPhantom" required maxlength="16" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="newEmail" placeholder="racer@turbokart.io" />
+        </div>
+        <div class="form-group">
+          <label>Device Platform</label>
+          <select id="newDeviceType">
+            <option value="Desktop">Desktop (Windows / Mac / Linux)</option>
+            <option value="Android">Android Mobile / Tablet</option>
+            <option value="Other">Other Device (iOS, Console, etc.)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kart Chassis Style</label>
+          <select id="newChassis">
+            <option value="standard">Standard Kart</option>
+            <option value="bullet">Bullet Racer</option>
+            <option value="muscle">Muscle Turbo</option>
+            <option value="formula">Formula GP</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" id="cancelAddPlayerBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to Live Database</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Footer -->
+  <footer class="admin-footer">
+    <div>🏎️ Turbo Smash Karts 3D • Standalone Analytics Engine</div>
+    <div id="footerTimestamp">Live Sync Active • 100% Real-Time Data</div>
+  </footer>
+
+  <!-- =========================================================================
+       ADMIN CONTROLLER & DATA BINDING SCRIPT (100% REAL-TIME, NO FAKE DATA)
+       ========================================================================= -->
+  <script>
+    (function () {
+      // State
+      let currentTimeRange = "7d";
+      let autoSyncInterval = null;
+      let currentPage = 1;
+      let searchDebounce = null;
+
+      // DOM Elements
+      const refreshBtn = document.getElementById("refreshBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const exportPlayersBtn = document.getElementById("exportPlayersBtn");
+      const timeBtns = document.querySelectorAll(".time-btn");
+      const tabBtns = document.querySelectorAll(".tab-nav-btn");
+      const tabPanes = document.querySelectorAll(".tab-pane");
+
+      // KPI Elements
+      const kpiTotalVisits = document.getElementById("kpiTotalVisits");
+      const kpiUniqueVisitors = document.getElementById("kpiUniqueVisitors");
+      const kpiActiveNow = document.getElementById("kpiActiveNow");
+      const kpiActiveBreakdown = document.getElementById("kpiActiveBreakdown");
+      const kpiTotalPlayers = document.getElementById("kpiTotalPlayers");
+      const kpiNewPlayersToday = document.getElementById("kpiNewPlayersToday");
+      const kpiAndroidPct = document.getElementById("kpiAndroidPct");
+      const kpiDesktopPct = document.getElementById("kpiDesktopPct");
+      const kpiOtherPct = document.getElementById("kpiOtherPct");
+      const kpiTrendDelta = document.getElementById("kpiTrendDelta");
+
+      // Device Hero Elements
+      const cardAndroidPct = document.getElementById("cardAndroidPct");
+      const cardAndroidCount = document.getElementById("cardAndroidCount");
+      const cardAndroidRacers = document.getElementById("cardAndroidRacers");
+      const cardAndroidTopOs = document.getElementById("cardAndroidTopOs");
+      const cardAndroidTopBrowser = document.getElementById("cardAndroidTopBrowser");
+
+      const cardDesktopPct = document.getElementById("cardDesktopPct");
+      const cardDesktopCount = document.getElementById("cardDesktopCount");
+      const cardDesktopRacers = document.getElementById("cardDesktopRacers");
+      const cardDesktopTopOs = document.getElementById("cardDesktopTopOs");
+      const cardDesktopTopBrowser = document.getElementById("cardDesktopTopBrowser");
+
+      const cardOtherPct = document.getElementById("cardOtherPct");
+      const cardOtherCount = document.getElementById("cardOtherCount");
+      const cardOtherRacers = document.getElementById("cardOtherRacers");
+      const cardOtherTopOs = document.getElementById("cardOtherTopOs");
+      const cardOtherTopBrowser = document.getElementById("cardOtherTopBrowser");
+
+      // Donut Elements
+      const donutAndroid = document.getElementById("donutAndroid");
+      const donutDesktop = document.getElementById("donutDesktop");
+      const donutOther = document.getElementById("donutOther");
+      const donutCenterTotal = document.getElementById("donutCenterTotal");
+      const legendAndroidSub = document.getElementById("legendAndroidSub");
+      const legendDesktopSub = document.getElementById("legendDesktopSub");
+      const legendOtherSub = document.getElementById("legendOtherSub");
+
+      // Engagement Elements
+      const metricAvgDuration = document.getElementById("metricAvgDuration");
+      const metricAvgDurationBar = document.getElementById("metricAvgDurationBar");
+      const metricBounceRate = document.getElementById("metricBounceRate");
+      const metricBounceRateBar = document.getElementById("metricBounceRateBar");
+
+      // Players Table Elements
+      const playersTableBody = document.getElementById("playersTableBody");
+      const playerSearchInput = document.getElementById("playerSearchInput");
+      const playerDeviceFilter = document.getElementById("playerDeviceFilter");
+      const playerStatusFilter = document.getElementById("playerStatusFilter");
+      const playerSortBy = document.getElementById("playerSortBy");
+      const prevPageBtn = document.getElementById("prevPageBtn");
+      const nextPageBtn = document.getElementById("nextPageBtn");
+      const pageIndicator = document.getElementById("pageIndicator");
+      const playerTableSummary = document.getElementById("playerTableSummary");
+      const tabPlayersCount = document.getElementById("tabPlayersCount");
+
+      // Modals
+      const playerModal = document.getElementById("playerModal");
+      const closePlayerModalBtn = document.getElementById("closePlayerModalBtn");
+      const addPlayerModal = document.getElementById("addPlayerModal");
+      const openAddPlayerModalBtn = document.getElementById("openAddPlayerModalBtn");
+      const closeAddPlayerModalBtn = document.getElementById("closeAddPlayerModalBtn");
+      const cancelAddPlayerBtn = document.getElementById("cancelAddPlayerBtn");
+      const addPlayerForm = document.getElementById("addPlayerForm");
+
+      // Activity Stream
+      const activityStreamBox = document.getElementById("activityStreamBox");
+
+      // =====================================================================
+      // DATA FETCHING (REAL-TIME SERVER APIS ONLY)
+      // =====================================================================
+
+      async function fetchSummary() {
+        try {
+          const res = await fetch(`/api/analytics/summary?timeRange=${currentTimeRange}`);
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          const data = await res.json();
+          renderSummary(data);
+          document.getElementById("srvConnStatus").textContent = "Connected";
+          document.getElementById("srvConnStatus").style.color = "#34d399";
+        } catch (err) {
+          console.error("[Admin] Real-time fetch error:", err);
+          document.getElementById("srvConnStatus").textContent = "Disconnected / Reconnecting";
+          document.getElementById("srvConnStatus").style.color = "#f87171";
+        }
+      }
+
+      async function fetchPlayers() {
+        try {
+          const search = encodeURIComponent(playerSearchInput.value.trim());
+          const device = playerDeviceFilter.value;
+          const status = playerStatusFilter.value;
+          const sortBy = playerSortBy.value;
+
+          const url = `/api/analytics/players?search=${search}&device=${device}&status=${status}&sortBy=${sortBy}&page=${currentPage}&limit=12`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          const data = await res.json();
+          renderPlayersTable(data);
+        } catch (err) {
+          console.error("[Admin] Players fetch error:", err);
+        }
+      }
+
+      // =====================================================================
+      // RENDERING REAL-TIME DATA
+      // =====================================================================
+
+      function renderSummary(data) {
+        if (!data || !data.kpis) return;
+
+        // Total Visits & Unique Visitors
+        const totalVisits = data.kpis.totalVisits || 0;
+        kpiTotalVisits.textContent = totalVisits.toLocaleString();
+        kpiUniqueVisitors.textContent = (data.kpis.uniqueVisitors || 0).toLocaleString();
+
+        // Trend Delta Percentage vs Prior Period
+        if (data.kpis.trendDeltaPct !== null && data.kpis.trendDeltaPct !== undefined) {
+          const delta = data.kpis.trendDeltaPct;
+          if (delta > 0) {
+            kpiTrendDelta.className = "trend-badge trend-up";
+            kpiTrendDelta.textContent = `▲ +${delta}%`;
+          } else if (delta < 0) {
+            kpiTrendDelta.className = "trend-badge trend-down";
+            kpiTrendDelta.textContent = `▼ ${delta}%`;
+          } else {
+            kpiTrendDelta.className = "trend-badge trend-neutral";
+            kpiTrendDelta.textContent = `0%`;
+          }
+        } else {
+          kpiTrendDelta.className = "trend-badge trend-neutral";
+          kpiTrendDelta.textContent = "0%";
+        }
+
+        // Live Active Users
+        const activeNow = data.kpis.activeNow || 0;
+        kpiActiveNow.textContent = activeNow;
+        document.getElementById("activeSessionsCount").textContent = activeNow;
+
+        const activeBk = data.kpis.activeBreakdown || { android: 0, desktop: 0, other: 0 };
+        kpiActiveBreakdown.textContent = `${activeBk.android} Android • ${activeBk.desktop} Desktop • ${activeBk.other} Other`;
+
+        // Registered Players
+        const totalPlayers = data.kpis.registeredPlayersTotal || 0;
+        kpiTotalPlayers.textContent = totalPlayers.toLocaleString();
+        kpiNewPlayersToday.textContent = `+${data.kpis.registeredToday || 0} today`;
+        tabPlayersCount.textContent = totalPlayers;
+
+        // Device Breakdown Percentages
+        const dev = data.devices || {
+          android: { count: 0, pct: 0, registeredCount: 0 },
+          desktop: { count: 0, pct: 0, registeredCount: 0 },
+          other: { count: 0, pct: 0, registeredCount: 0 }
+        };
+
+        kpiAndroidPct.textContent = (dev.android.pct || 0) + "%";
+        kpiDesktopPct.textContent = (dev.desktop.pct || 0) + "%";
+        kpiOtherPct.textContent = (dev.other.pct || 0) + "%";
+
+        // Tab 2: Hero Cards
+        cardAndroidPct.textContent = (dev.android.pct || 0) + "%";
+        cardAndroidCount.textContent = (dev.android.count || 0).toLocaleString();
+        cardAndroidRacers.textContent = dev.android.registeredCount || 0;
+
+        cardDesktopPct.textContent = (dev.desktop.pct || 0) + "%";
+        cardDesktopCount.textContent = (dev.desktop.count || 0).toLocaleString();
+        cardDesktopRacers.textContent = dev.desktop.registeredCount || 0;
+
+        cardOtherPct.textContent = (dev.other.pct || 0) + "%";
+        cardOtherCount.textContent = (dev.other.count || 0).toLocaleString();
+        cardOtherRacers.textContent = dev.other.registeredCount || 0;
+
+        // Top Detected OS and Browser dynamically from real logs
+        const androidOsList = (data.osBreakdown || []).filter(o => o.name.toLowerCase().includes("android"));
+        cardAndroidTopOs.textContent = androidOsList.length > 0 ? androidOsList[0].name : "None detected";
+
+        const desktopOsList = (data.osBreakdown || []).filter(o => /windows|mac|linux/i.test(o.name));
+        cardDesktopTopOs.textContent = desktopOsList.length > 0 ? desktopOsList[0].name : "None detected";
+
+        const otherOsList = (data.osBreakdown || []).filter(o => /ios|ipad|chromeos|console/i.test(o.name));
+        cardOtherTopOs.textContent = otherOsList.length > 0 ? otherOsList[0].name : "None detected";
+
+        const browsers = data.browserBreakdown || [];
+        cardAndroidTopBrowser.textContent = browsers.find(b => /android|chrome mobile|samsung/i.test(b.name))?.name || "None detected";
+        cardDesktopTopBrowser.textContent = browsers.find(b => !/mobile/i.test(b.name))?.name || "None detected";
+        cardOtherTopBrowser.textContent = browsers.find(b => /safari/i.test(b.name))?.name || "None detected";
+
+        // Donut Chart Calculation (Circumference of r=38 is 2 * PI * 38 = 238.76)
+        const C = 238.76;
+        if (totalVisits > 0) {
+          const aLen = (dev.android.pct / 100) * C;
+          const dLen = (dev.desktop.pct / 100) * C;
+          const oLen = (dev.other.pct / 100) * C;
+
+          donutAndroid.style.strokeDasharray = `${aLen} ${C - aLen}`;
+          donutAndroid.style.strokeDashoffset = "0";
+
+          donutDesktop.style.strokeDasharray = `${dLen} ${C - dLen}`;
+          donutDesktop.style.strokeDashoffset = `-${aLen}`;
+
+          donutOther.style.strokeDasharray = `${oLen} ${C - oLen}`;
+          donutOther.style.strokeDashoffset = `-${aLen + dLen}`;
+
+          donutCenterTotal.textContent = totalVisits;
+        } else {
+          donutAndroid.style.strokeDasharray = `0 ${C}`;
+          donutDesktop.style.strokeDasharray = `0 ${C}`;
+          donutOther.style.strokeDasharray = `0 ${C}`;
+          donutCenterTotal.textContent = "0";
+        }
+
+        legendAndroidSub.textContent = `${dev.android.count} visits (${dev.android.pct}%)`;
+        legendDesktopSub.textContent = `${dev.desktop.count} visits (${dev.desktop.pct}%)`;
+        legendOtherSub.textContent = `${dev.other.count} visits (${dev.other.pct}%)`;
+
+        // Real Engagement Metrics
+        if (data.engagement) {
+          const dur = data.engagement.avgDurationSec || 0;
+          metricAvgDuration.textContent = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
+          metricAvgDurationBar.style.width = Math.min(100, Math.round((dur / 300) * 100)) + "%";
+
+          const bounce = data.engagement.bounceRate || 0;
+          metricBounceRate.textContent = bounce + "%";
+          metricBounceRateBar.style.width = bounce + "%";
+        }
+
+        // Timeline SVG Chart
+        renderTimelineChart(data.timeline || [], totalVisits);
+
+        // Referrers List
+        renderReferrers(data.referrers || []);
+
+        // Screen Resolutions List
+        renderScreens(data.screens || []);
+
+        // Operating Systems List
+        renderOperatingSystems(data.osBreakdown || []);
+
+        // Browsers List
+        renderBrowsers(data.browserBreakdown || []);
+
+        // Battle Engine Status
+        document.getElementById("srvActiveRooms").textContent = data.kpis.activeRooms || "0";
+        document.getElementById("srvInGamePlayers").textContent = data.kpis.playersInGame || "0";
+
+        // Activity Stream
+        renderActivityStream(data.recentEvents || []);
+      }
+
+      function renderTimelineChart(timeline, totalVisits) {
+        const svg = document.getElementById("trafficSvg");
+        svg.innerHTML = "";
+
+        if (!timeline || timeline.length === 0 || totalVisits === 0) {
+          svg.innerHTML = `
+            <text x="400" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#64748b">
+              No traffic recorded for this time range yet. Live events will plot automatically.
+            </text>
+          `;
+          return;
+        }
+
+        const width = 800;
+        const height = 220;
+        const padX = 40;
+        const padY = 30;
+        const innerW = width - padX * 2;
+        const innerH = height - padY * 2;
+
+        const maxVisits = Math.max(...timeline.map(t => t.visits), 5);
+
+        // Horizontal Grid lines
+        for (let i = 0; i <= 4; i++) {
+          const y = padY + (innerH / 4) * i;
+          const val = Math.round(maxVisits - (maxVisits / 4) * i);
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", padX);
+          line.setAttribute("y1", y);
+          line.setAttribute("x2", width - padX);
+          line.setAttribute("y2", y);
+          line.setAttribute("stroke", "rgba(255,255,255,0.06)");
+          line.setAttribute("stroke-width", "1");
+          svg.appendChild(line);
+
+          const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          txt.setAttribute("x", padX - 8);
+          txt.setAttribute("y", y + 4);
+          txt.setAttribute("text-anchor", "end");
+          txt.setAttribute("font-size", "10");
+          txt.setAttribute("fill", "#64748b");
+          txt.textContent = val;
+          svg.appendChild(txt);
+        }
+
+        // Calculate points
+        const stepX = innerW / (timeline.length - 1 || 1);
+        const points = timeline.map((t, idx) => {
+          const x = padX + idx * stepX;
+          const y = padY + innerH - (t.visits / maxVisits) * innerH;
+          return { x, y, data: t };
+        });
+
+        // Area Path
+        let areaD = `M ${points[0].x} ${padY + innerH}`;
+        points.forEach(p => { areaD += ` L ${p.x} ${p.y}`; });
+        areaD += ` L ${points[points.length - 1].x} ${padY + innerH} Z`;
+
+        const areaPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        areaPath.setAttribute("d", areaD);
+        areaPath.setAttribute("fill", "url(#amberGlow)");
+        areaPath.setAttribute("opacity", "0.25");
+        svg.appendChild(areaPath);
+
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        defs.innerHTML = `
+          <linearGradient id="amberGlow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+          </linearGradient>
+        `;
+        svg.appendChild(defs);
+
+        // Line Path
+        let lineD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+          lineD += ` L ${points[i].x} ${points[i].y}`;
+        }
+
+        const linePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        linePath.setAttribute("d", lineD);
+        linePath.setAttribute("fill", "none");
+        linePath.setAttribute("stroke", "#f59e0b");
+        linePath.setAttribute("stroke-width", "3");
+        linePath.setAttribute("stroke-linecap", "round");
+        svg.appendChild(linePath);
+
+        // Tooltip interaction circles
+        const tooltip = document.getElementById("chartTooltip");
+        const chartBox = document.getElementById("trafficChartBox");
+
+        points.forEach((p) => {
+          const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          c.setAttribute("cx", p.x);
+          c.setAttribute("cy", p.y);
+          c.setAttribute("r", p.data.visits > 0 ? "5" : "3");
+          c.setAttribute("fill", "#090d16");
+          c.setAttribute("stroke", "#f59e0b");
+          c.setAttribute("stroke-width", "2");
+          c.style.cursor = "pointer";
+
+          c.addEventListener("mouseenter", () => {
+            c.setAttribute("r", "8");
+            tooltip.style.display = "block";
+            tooltip.innerHTML = `
+              <strong>${p.data.label}</strong><br/>
+              Visits: <strong>${p.data.visits}</strong><br/>
+              <span style="color:#34d399">🤖 Android: ${p.data.android || 0}</span><br/>
+              <span style="color:#38bdf8">💻 Desktop: ${p.data.desktop || 0}</span><br/>
+              <span style="color:#c084fc">📱 Other: ${p.data.other || 0}</span>
+            `;
+            const boxRect = chartBox.getBoundingClientRect();
+            const relX = (p.x / width) * boxRect.width;
+            const relY = (p.y / height) * boxRect.height;
+            tooltip.style.left = relX + "px";
+            tooltip.style.top = relY + "px";
+          });
+
+          c.addEventListener("mouseleave", () => {
+            c.setAttribute("r", p.data.visits > 0 ? "5" : "3");
+            tooltip.style.display = "none";
+          });
+
+          svg.appendChild(c);
+        });
+
+        // X-Axis labels
+        points.forEach((p, idx) => {
+          if (timeline.length > 12 && idx % 2 !== 0 && idx !== timeline.length - 1) return;
+          const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          txt.setAttribute("x", p.x);
+          txt.setAttribute("y", height - 8);
+          txt.setAttribute("text-anchor", "middle");
+          txt.setAttribute("font-size", "10");
+          txt.setAttribute("fill", "#94a3b8");
+          txt.textContent = p.data.label;
+          svg.appendChild(txt);
+        });
+      }
+
+      function renderReferrers(list) {
+        const box = document.getElementById("referrerList");
+        box.innerHTML = "";
+        if (!list || list.length === 0) {
+          box.innerHTML = `<div style="color:var(--text-dim); font-size:12px; padding:8px 0;">No referral traffic recorded yet.</div>`;
+          return;
+        }
+
+        list.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "device-breakdown-list";
+          row.innerHTML = `
+            <div class="breakdown-row">
+              <span style="font-weight:700; color:#fff;">${item.name}</span>
+              <span class="val">${item.count} (${item.pct}%)</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${item.pct}%; background: linear-gradient(90deg, #f59e0b, #ea580c);"></div>
+            </div>
+          `;
+          box.appendChild(row);
+        });
+      }
+
+      function renderScreens(list) {
+        const box = document.getElementById("screenList");
+        box.innerHTML = "";
+        if (!list || list.length === 0) {
+          box.innerHTML = `<div style="color:var(--text-dim); font-size:12px; padding:8px 0;">No screen data recorded yet.</div>`;
+          return;
+        }
+
+        list.forEach(item => {
+          const row = document.createElement("div");
+          row.innerHTML = `
+            <div class="breakdown-row">
+              <span>${item.res}</span>
+              <span class="val">${item.count} sessions</span>
+            </div>
+          `;
+          box.appendChild(row);
+        });
+      }
+
+      function renderOperatingSystems(list) {
+        const box = document.getElementById("osDetailedList");
+        box.innerHTML = "";
+        if (!list || list.length === 0) {
+          box.innerHTML = `<div style="color:var(--text-dim); font-size:12px; padding:8px 0;">No OS telemetry recorded yet.</div>`;
+          return;
+        }
+
+        list.forEach(item => {
+          let color = "#3b82f6";
+          let icon = "💻";
+          if (item.name.includes("Android")) { color = "#10b981"; icon = "🤖"; }
+          else if (item.name.includes("iOS")) { color = "#8b5cf6"; icon = "📱"; }
+          else if (item.name.includes("Mac")) { color = "#06b6d4"; icon = "🍎"; }
+          else if (item.name.includes("Windows")) { color = "#3b82f6"; icon = "🪟"; }
+          else if (item.name.includes("Linux")) { color = "#eab308"; icon = "🐧"; }
+
+          const row = document.createElement("div");
+          row.style.marginBottom = "8px";
+          row.innerHTML = `
+            <div class="breakdown-row">
+              <span style="color:#fff; font-weight:700;">${icon} ${item.name}</span>
+              <span class="val">${item.count} (${item.pct}%)</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${item.pct}%; background: ${color};"></div>
+            </div>
+          `;
+          box.appendChild(row);
+        });
+      }
+
+      function renderBrowsers(list) {
+        const box = document.getElementById("browserGrid");
+        box.innerHTML = "";
+        if (!list || list.length === 0) {
+          box.innerHTML = `<div style="color:var(--text-dim); font-size:12px; padding:8px 0;">No browser telemetry recorded yet.</div>`;
+          return;
+        }
+
+        list.forEach(item => {
+          const card = document.createElement("div");
+          card.style.background = "rgba(255,255,255,0.03)";
+          card.style.padding = "10px 14px";
+          card.style.borderRadius = "10px";
+          card.style.border = "1px solid var(--border-glass)";
+          card.innerHTML = `
+            <div class="breakdown-row">
+              <strong style="color:#fff;">${item.name}</strong>
+              <span class="val">${item.count} (${item.pct}%)</span>
+            </div>
+            <div class="progress-bar" style="margin-top:6px;">
+              <div class="progress-fill" style="width: ${item.pct}%; background: #06b6d4;"></div>
+            </div>
+          `;
+          box.appendChild(card);
+        });
+      }
+
+      function renderActivityStream(events) {
+        activityStreamBox.innerHTML = "";
+        if (!events || events.length === 0) {
+          activityStreamBox.innerHTML = `<div style="color:var(--text-dim); text-align:center; padding:20px;">No events recorded yet. Stream updates live as actions occur.</div>`;
+          return;
+        }
+
+        events.forEach(ev => {
+          let icon = "🌐";
+          let color = "#3b82f6";
+          if (ev.type === "PLAYER_REGISTER") { icon = "🎉"; color = "#f59e0b"; }
+          else if (ev.type === "ROOM_JOIN") { icon = "🏎️"; color = "#10b981"; }
+          else if (ev.device === "Android") { icon = "🤖"; color = "#10b981"; }
+          else if (ev.device === "Desktop") { icon = "💻"; color = "#06b6d4"; }
+
+          const timeFormatted = new Date(ev.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+          const div = document.createElement("div");
+          div.className = "activity-item";
+          div.innerHTML = `
+            <div class="activity-icon" style="color:${color};">${icon}</div>
+            <div class="activity-content">
+              <strong>${escapeHtml(ev.text)}</strong>
+              ${ev.device ? `<span class="device-tag ${ev.device.toLowerCase()}" style="margin-left:8px; font-size:9.5px; padding:1px 6px;">${ev.device}</span>` : ""}
+            </div>
+            <div class="activity-time">${timeFormatted}</div>
+          `;
+          activityStreamBox.appendChild(div);
+        });
+      }
+
+      function renderPlayersTable(data) {
+        playersTableBody.innerHTML = "";
+        const players = data.players || [];
+
+        if (players.length === 0) {
+          playersTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:35px; color:var(--text-dim);">No registered racers yet. Players will appear here when they register their account.</td></tr>`;
+          playerTableSummary.textContent = "0 racers found";
+          prevPageBtn.disabled = true;
+          nextPageBtn.disabled = true;
+          return;
+        }
+
+        players.forEach(p => {
+          const tr = document.createElement("tr");
+
+          const devType = p.deviceType || "Desktop";
+          const devClass = devType.toLowerCase();
+          const devIcon = devType === "Android" ? "🤖" : (devType === "Desktop" ? "💻" : "📱");
+
+          const status = p.status || "offline";
+          const statusClass = status.toLowerCase();
+          const regDate = p.registeredAt ? new Date(p.registeredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "--";
+
+          tr.innerHTML = `
+            <td>
+              <div class="player-cell">
+                <div class="player-avatar-circle" style="background:${p.kartColor ? '#' + Number(p.kartColor).toString(16).padStart(6, '0') : '#0284c7'}">
+                  ${p.hat === 'crown' ? '👑' : (p.hat === 'helmet' ? '🪖' : '🏎️')}
+                </div>
+                <div class="player-name-wrap">
+                  <strong>${escapeHtml(p.username)}</strong>
+                  <span class="player-id-mono">${p.id}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="device-tag ${devClass}">
+                <span>${devIcon}</span> ${devType}
+              </span>
+              <div style="font-size:11px; color:var(--text-dim); margin-top:3px;">${escapeHtml(p.os || 'Unknown')}</div>
+            </td>
+            <td><strong>${p.matchesPlayed || 0}</strong></td>
+            <td><strong style="color:#ef4444;">${p.smashes || 0}</strong></td>
+            <td><strong style="color:#fbbf24;">${(p.score || 0).toLocaleString()}</strong></td>
+            <td><span style="font-size:12px;">${regDate}</span></td>
+            <td>
+              <span class="status-badge ${statusClass}">
+                ● ${capitalize(status)}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-secondary view-player-btn" style="padding:4px 8px; font-size:11px;">Inspect</button>
+            </td>
+          `;
+
+          tr.querySelector(".view-player-btn").addEventListener("click", () => openPlayerModal(p));
+          playersTableBody.appendChild(tr);
+        });
+
+        const total = data.total || players.length;
+        const totalPages = data.totalPages || 1;
+        playerTableSummary.textContent = `Showing ${players.length} of ${total} racers`;
+        pageIndicator.textContent = `Page ${data.page || 1} of ${totalPages}`;
+        prevPageBtn.disabled = ((data.page || 1) <= 1);
+        nextPageBtn.disabled = ((data.page || 1) >= totalPages);
+      }
+
+      function openPlayerModal(player) {
+        document.getElementById("modalPlayerTitle").textContent = `${player.username} (Driver Record)`;
+        const content = document.getElementById("modalPlayerContent");
+
+        const colorHex = '#' + (Number(player.kartColor || 0xef4444).toString(16).padStart(6, '0'));
+        const regDate = player.registeredAt ? new Date(player.registeredAt).toLocaleString() : "--";
+        const lastActive = player.lastActive ? new Date(player.lastActive).toLocaleString() : "--";
+
+        content.innerHTML = `
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid var(--border-glass);">
+            <div class="player-avatar-circle" style="width:48px; height:48px; font-size:24px; background:${colorHex};">🏎️</div>
+            <div>
+              <h4 style="font-size:17px; font-weight:800; color:#fff;">${escapeHtml(player.username)}</h4>
+              <p style="font-size:12px; color:var(--text-muted);">${escapeHtml(player.email || 'No email attached')}</p>
+              <div style="margin-top:4px;">
+                <span class="device-tag ${(player.deviceType || 'Desktop').toLowerCase()}">${player.deviceType || 'Desktop'}</span>
+                <span class="status-badge ${(player.status || 'offline').toLowerCase()}" style="margin-left:6px;">● ${player.status || 'offline'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Total Smashes:</span>
+              <strong style="font-size:20px; color:#ef4444;">${player.smashes || 0} 💥</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:10px;">
+              <span style="font-size:11px; color:var(--text-muted); display:block;">Arena Score:</span>
+              <strong style="font-size:20px; color:#fbbf24;">${(player.score || 0).toLocaleString()} 🏆</strong>
+            </div>
+          </div>
+
+          <div class="device-breakdown-list">
+            <div class="breakdown-row"><span>Driver ID:</span><span class="val" style="font-family:var(--font-mono);">${player.id}</span></div>
+            <div class="breakdown-row"><span>Hardware OS:</span><span class="val">${escapeHtml(player.os || 'Unknown')}</span></div>
+            <div class="breakdown-row"><span>Web Browser:</span><span class="val">${escapeHtml(player.browser || 'Unknown')}</span></div>
+            <div class="breakdown-row"><span>Kart Setup:</span><span class="val">${player.chassis || 'standard'} chassis • ${player.wheels || 'slicks'} wheels</span></div>
+            <div class="breakdown-row"><span>Registered Date:</span><span class="val">${regDate}</span></div>
+            <div class="breakdown-row"><span>Last Active:</span><span class="val">${lastActive}</span></div>
+          </div>
+
+          <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+            <button class="btn btn-secondary" onclick="document.getElementById('playerModal').classList.remove('open')">Close</button>
+          </div>
+        `;
+
+        playerModal.classList.add("open");
+      }
+
+      // =====================================================================
+      // EVENT LISTENERS & CONTROLS
+      // =====================================================================
+
+      // Time Range Buttons
+      timeBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          timeBtns.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentTimeRange = btn.dataset.range;
+          fetchSummary();
+        });
+      });
+
+      // Tabs
+      tabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          tabBtns.forEach(b => b.classList.remove("active"));
+          tabPanes.forEach(p => p.classList.remove("active"));
+
+          btn.classList.add("active");
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.add("active");
+
+          if (btn.dataset.tab === "tabPlayers") {
+            fetchPlayers();
+          }
+        });
+      });
+
+      // Refresh Button
+      refreshBtn.addEventListener("click", () => {
+        fetchSummary();
+        fetchPlayers();
+      });
+
+      // Export Analytics CSV
+      exportBtn.addEventListener("click", () => {
+        window.location.href = "/api/analytics/export?format=csv&type=traffic";
+      });
+
+      // Export Players CSV
+      exportPlayersBtn.addEventListener("click", () => {
+        window.location.href = "/api/analytics/export?format=csv&type=players";
+      });
+
+      // Search & Filters for Players
+      playerSearchInput.addEventListener("input", () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+          currentPage = 1;
+          fetchPlayers();
+        }, 300);
+      });
+
+      playerDeviceFilter.addEventListener("change", () => { currentPage = 1; fetchPlayers(); });
+      playerStatusFilter.addEventListener("change", () => { currentPage = 1; fetchPlayers(); });
+      playerSortBy.addEventListener("change", () => { currentPage = 1; fetchPlayers(); });
+
+      // Pagination
+      prevPageBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchPlayers();
+        }
+      });
+
+      nextPageBtn.addEventListener("click", () => {
+        currentPage++;
+        fetchPlayers();
+      });
+
+      // Modal Events
+      closePlayerModalBtn.addEventListener("click", () => playerModal.classList.remove("open"));
+      playerModal.addEventListener("click", (e) => {
+        if (e.target === playerModal) playerModal.classList.remove("open");
+      });
+
+      openAddPlayerModalBtn.addEventListener("click", () => addPlayerModal.classList.add("open"));
+      closeAddPlayerModalBtn.addEventListener("click", () => addPlayerModal.classList.remove("open"));
+      cancelAddPlayerBtn.addEventListener("click", () => addPlayerModal.classList.remove("open"));
+      addPlayerModal.addEventListener("click", (e) => {
+        if (e.target === addPlayerModal) addPlayerModal.classList.remove("open");
+      });
+
+      // Add Player Form Submit
+      addPlayerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("newUsername").value.trim();
+        const email = document.getElementById("newEmail").value.trim();
+        const deviceType = document.getElementById("newDeviceType").value;
+        const chassis = document.getElementById("newChassis").value;
+
+        if (!username) return;
+
+        try {
+          const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, deviceType, chassis })
+          });
+          const result = await res.json();
+          if (result.success) {
+            addPlayerModal.classList.remove("open");
+            addPlayerForm.reset();
+            fetchPlayers();
+            fetchSummary();
+          }
+        } catch (err) {
+          console.error("Failed to register racer:", err);
+          addPlayerModal.classList.remove("open");
+        }
+      });
+
+      // Clear Activity Stream View
+      document.getElementById("clearStreamBtn").addEventListener("click", () => {
+        activityStreamBox.innerHTML = `<div style="color:var(--text-dim); text-align:center; padding:20px;">Stream cleared.</div>`;
+      });
+
+      // Auto-Sync Toggle (Every 5 seconds)
+      let autoSyncActive = true;
+      const autoSyncToggle = document.getElementById("autoSyncToggle");
+      const autoSyncIcon = document.getElementById("autoSyncIcon");
+      const autoSyncText = document.getElementById("autoSyncText");
+
+      function startAutoSync() {
+        if (autoSyncInterval) clearInterval(autoSyncInterval);
+        autoSyncInterval = setInterval(() => {
+          fetchSummary();
+        }, 5000);
+      }
+
+      autoSyncToggle.addEventListener("click", () => {
+        autoSyncActive = !autoSyncActive;
+        if (autoSyncActive) {
+          autoSyncIcon.textContent = "🟢";
+          autoSyncText.textContent = "5s";
+          startAutoSync();
+        } else {
+          autoSyncIcon.textContent = "⚪";
+          autoSyncText.textContent = "Off";
+          clearInterval(autoSyncInterval);
+        }
+      });
+
+      // Escape helpers
+      function escapeHtml(str = "") {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function capitalize(str = "") {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      // Initial Bootstrap
+      fetchSummary();
+      fetchPlayers();
+      startAutoSync();
+
+    })();
+  </script>
+</body>
+</html>

@@ -5,6 +5,11 @@
   <meta charset="utf-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="screen-orientation" content="landscape" />
+  <meta name="theme-color" content="#090d16" />
   <title>Turbo Smash Karts 3D - Online Battle Arena</title>
   <meta name="description"
     content="Production-ready 3D Smash Karts Multiplayer Battle Arena with weapon rules, map changes, custom karts, bot AI, and real-time room battles." />
@@ -38,23 +43,28 @@
       -webkit-touch-callout: none;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html,
     body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
+      position: fixed;
+      inset: 0;
       overflow: hidden;
       background: var(--dark);
       font-family: var(--font-main);
       color: #fff;
-      touch-action: manipulation;
+      touch-action: none;
+      overscroll-behavior: none;
     }
 
     canvas#gameCanvas {
       display: block;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       outline: none;
       touch-action: none;
     }
@@ -62,7 +72,10 @@
     #gameContainer {
       position: absolute;
       inset: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      touch-action: none;
     }
 
     /* General Overlays */
@@ -80,6 +93,8 @@
       padding: max(12px, var(--sat)) max(12px, var(--sar)) max(12px, var(--sab)) max(12px, var(--sal));
       overflow-y: auto;
       overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
     }
 
     .hidden {
@@ -91,6 +106,8 @@
       max-height: min(90vh, 90dvh);
       overflow-y: auto;
       overscroll-behavior: contain;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
       background: var(--card-bg);
       border: 1px solid var(--glass-border);
       border-radius: clamp(16px, 3vw, 24px);
@@ -460,6 +477,33 @@
       color: #94a3b8;
       line-height: 1.4;
       margin-bottom: 4px;
+    }
+
+    .rotate-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 999px;
+      color: #fcd34d;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    .status-dot-pulse {
+      width: 7px;
+      height: 7px;
+      background: #fbbf24;
+      border-radius: 50%;
+      animation: statusDotPulse 1.4s infinite ease-in-out;
+    }
+
+    @keyframes statusDotPulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 8px #fbbf24; }
     }
 
     /* Dialog Components */
@@ -1620,87 +1664,105 @@
 
     @media (max-height: 540px) {
       .turbo-top-bar {
-        padding: max(6px, var(--sat)) max(14px, var(--sar)) 4px max(14px, var(--sal));
-      }
-      .turbo-top-left, .turbo-top-right {
+        padding: max(4px, var(--sat)) max(14px, var(--sar)) 4px max(14px, var(--sal));
         gap: 6px;
       }
+      .turbo-top-left, .turbo-top-right {
+        gap: 5px;
+      }
       .turbo-level-shield {
-        width: 30px;
-        height: 34px;
-        font-size: 15px;
+        width: 28px;
+        height: 32px;
+        font-size: 14px;
       }
       .turbo-level-capsule {
-        height: 28px;
-        padding: 0 20px 0 10px;
-        min-width: 80px;
+        height: 26px;
+        padding: 0 16px 0 8px;
+        min-width: 68px;
       }
-      .turbo-level-text { font-size: 10.5px; }
-      .turbo-xp-badge { width: 20px; height: 22px; font-size: 8px; }
+      .turbo-level-text { font-size: 9.5px; }
+      .turbo-xp-badge { width: 18px; height: 20px; font-size: 7.5px; right: -4px; }
       .turbo-currency-pill {
-        height: 28px;
-        padding: 0 4px 0 8px;
-        gap: 5px;
+        height: 26px;
+        padding: 0 3px 0 6px;
+        gap: 4px;
       }
-      .turbo-curr-val { font-size: 12.5px; }
-      .turbo-curr-add { width: 18px; height: 18px; font-size: 13px; }
+      .turbo-curr-val { font-size: 11.5px; min-width: 14px; }
+      .turbo-curr-add { width: 17px; height: 17px; font-size: 12px; }
+      .turbo-curr-icon svg { width: 15px; height: 15px; }
       .turbo-header-btn {
-        height: 30px;
-        padding: 0 10px;
-        font-size: 11.5px;
-        gap: 5px;
+        height: 28px;
+        padding: 0 8px;
+        font-size: 11px;
+        gap: 4px;
+      }
+      .turbo-fs-btn {
+        padding: 0 8px !important;
+        min-width: 30px;
+        justify-content: center;
       }
 
       .turbo-logo-container {
-        top: max(4px, var(--sat));
-        transform: translateX(-50%) scale(0.68);
+        top: max(2px, var(--sat));
+        transform: translateX(-50%) scale(0.55);
         transform-origin: top center;
-        max-width: 45%;
+        max-width: 38%;
       }
 
       .turbo-body-layout {
-        padding: 0 max(12px, var(--sal)) max(8px, var(--sab));
+        padding: 0 max(12px, var(--sal)) max(6px, var(--sab));
       }
 
       .turbo-left-sidebar {
-        width: 185px;
-        gap: 5px;
+        width: 172px;
+        gap: 4px;
         margin-bottom: 2px;
+        max-height: calc(100vh - 46px);
+        max-height: calc(100dvh - 46px);
       }
-      .turbo-profile-card { padding: 4px 8px; gap: 6px; }
-      .turbo-avatar-box { width: 30px; height: 30px; }
-      .turbo-avatar-cat { font-size: 16px; }
-      .turbo-name-box input { font-size: 12px; }
-      .turbo-edit-btn { width: 22px; height: 22px; }
+      .turbo-profile-card { padding: 3px 6px; gap: 6px; }
+      .turbo-avatar-box { width: 28px; height: 28px; }
+      .turbo-avatar-cat { font-size: 15px; }
+      .turbo-name-box input { font-size: 11.5px; }
+      .turbo-edit-btn { width: 20px; height: 20px; }
 
-      .turbo-action-card { padding: 6px 10px; }
-      .turbo-card-title { font-size: 12px; }
-      .turbo-signin-title { font-size: 11.5px; }
-      .turbo-signin-sub { font-size: 8.5px; }
+      .turbo-action-card { padding: 5px 8px; }
+      .turbo-card-title { font-size: 11.5px; }
+      .turbo-signin-title { font-size: 11px; }
+      .turbo-signin-sub { display: none; }
 
-      .turbo-friends-header { padding: 6px 8px 4px; }
-      .turbo-friends-title { font-size: 11.5px; }
-      .turbo-friends-body { padding: 4px 8px 6px; }
-      .turbo-friends-big-icon svg { width: 28px; height: 28px; }
-      .turbo-friends-empty-title { font-size: 11px; }
-      .turbo-friends-empty-desc { display: none; }
-      .turbo-friends-add-action { margin-top: 3px; padding: 2px 8px; font-size: 9.5px; }
+      .turbo-friends-header { padding: 4px 6px; }
+      .turbo-friends-title { font-size: 11px; }
+      .turbo-friends-body { display: none; } /* In compact horizontal landscape, hide empty friends card body so layout never overflows */
 
       .turbo-center-bottom-actions {
-        gap: 6px;
+        gap: 4px;
+        margin-bottom: max(2px, var(--sab));
       }
       .turbo-giant-play-btn {
-        padding: 8px 44px;
-        font-size: 26px;
-        border-radius: 28px;
-        box-shadow: 0 6px 0 #9a3412, 0 10px 20px var(--turbo-orange-glow);
+        padding: 6px 36px;
+        font-size: 22px;
+        border-radius: 22px;
+        box-shadow: 0 5px 0 #9a3412, 0 8px 18px var(--turbo-orange-glow);
       }
-      .turbo-giant-play-btn svg { width: 22px; height: 22px; }
+      .turbo-giant-play-btn svg { width: 18px; height: 18px; }
       .turbo-sub-pill-btn {
-        padding: 5px 12px;
-        font-size: 12px;
-        min-width: 90px;
-        border-radius: 16px;
+        padding: 4px 10px;
+        font-size: 11px;
+        min-width: 78px;
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 720px) and (max-height: 480px) {
+      .turbo-logo-container {
+        display: none; /* In very compact Android landscape, hide decorative center logo so top buttons have full space */
+      }
+      .turbo-top-bar {
+        justify-content: space-between;
+      }
+      .turbo-left-sidebar {
+        width: 158px;
       }
     }
 
@@ -2311,72 +2373,91 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 12;
+      z-index: 20;
       display: none;
+      touch-action: none;
     }
 
     .touch-cluster-left {
       position: absolute;
-      left: max(10px, env(safe-area-inset-left));
-      bottom: max(10px, env(safe-area-inset-bottom));
+      left: max(16px, calc(var(--sal) + 8px));
+      bottom: max(12px, calc(var(--sab) + 4px));
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
       pointer-events: auto;
+      touch-action: none;
+      transform: scale(var(--touch-scale, 1));
+      transform-origin: bottom left;
+      opacity: var(--touch-opacity, 0.75);
     }
 
     .touch-steer-row {
       display: flex;
       gap: 8px;
+      touch-action: none;
     }
 
     .touch-cluster-right {
       position: absolute;
-      right: max(10px, env(safe-area-inset-right));
-      bottom: max(10px, env(safe-area-inset-bottom));
+      right: max(16px, calc(var(--sar) + 8px));
+      bottom: max(12px, calc(var(--sab) + 4px));
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: 7px;
       pointer-events: auto;
+      touch-action: none;
+      transform: scale(var(--touch-scale, 1));
+      transform-origin: bottom right;
+      opacity: var(--touch-opacity, 0.75);
+    }
+
+    .touch-action-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      touch-action: none;
     }
 
     .touch-pedals-row {
       display: flex;
       gap: 8px;
       align-items: flex-end;
+      touch-action: none;
     }
 
     .touch-btn {
       pointer-events: auto;
-      background: rgba(15, 23, 42, 0.72);
-      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1.5px solid rgba(255, 255, 255, 0.28);
       border-radius: 50%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       color: #fff;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
       transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
     }
 
     .touch-btn:active,
     .touch-btn.active {
       transform: scale(0.92);
-      background: rgba(245, 158, 11, 0.55);
-      border-color: #fbbf24;
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+      background: rgba(245, 158, 11, 0.65) !important;
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.8) !important;
     }
 
     .touch-btn .touch-icon {
-      font-size: clamp(16px, 3.5vw, 22px);
+      font-size: clamp(18px, 4vw, 24px);
       line-height: 1;
+      pointer-events: none;
     }
 
     .touch-btn .touch-label {
@@ -2386,82 +2467,194 @@
       margin-top: 2px;
       color: #cbd5e1;
       text-transform: uppercase;
+      pointer-events: none;
     }
 
     .touch-btn-steer {
-      width: clamp(50px, 11.5vw, 62px);
-      height: clamp(50px, 11.5vw, 62px);
+      width: clamp(52px, 11.5vw, 62px);
+      height: clamp(52px, 11.5vw, 62px);
+      background: rgba(30, 41, 59, 0.78);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .touch-btn-steer:active,
+    .touch-btn-steer.active {
+      background: rgba(56, 189, 248, 0.6) !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.85) !important;
     }
 
     .touch-btn-drift {
-      width: clamp(108px, 24vw, 132px);
-      height: clamp(36px, 8vw, 42px);
-      border-radius: 12px;
-      flex-direction: row;
-      gap: 6px;
-      background: rgba(139, 92, 246, 0.4);
-      border-color: rgba(168, 85, 247, 0.6);
+      width: clamp(50px, 11vw, 60px);
+      height: clamp(50px, 11vw, 60px);
+      background: rgba(139, 92, 246, 0.5);
+      border-color: rgba(168, 85, 247, 0.7);
     }
 
     .touch-btn-drift:active,
     .touch-btn-drift.active {
-      background: rgba(139, 92, 246, 0.7);
-      border-color: #c084fc;
-      box-shadow: 0 0 18px rgba(168, 85, 247, 0.7);
+      background: rgba(139, 92, 246, 0.85) !important;
+      border-color: #c084fc !important;
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.85) !important;
     }
 
     .touch-btn-gas {
-      width: clamp(60px, 13vw, 72px);
-      height: clamp(60px, 13vw, 72px);
-      background: rgba(16, 185, 129, 0.45);
+      width: clamp(56px, 12vw, 68px);
+      height: clamp(56px, 12vw, 68px);
+      background: rgba(16, 185, 129, 0.5);
       border-color: #10b981;
     }
 
     .touch-btn-gas:active,
     .touch-btn-gas.active {
-      background: rgba(16, 185, 129, 0.75);
-      border-color: #34d399;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+      background: rgba(16, 185, 129, 0.85) !important;
+      border-color: #34d399 !important;
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.85) !important;
     }
 
     .touch-btn-brake {
-      width: clamp(50px, 11vw, 58px);
-      height: clamp(50px, 11vw, 58px);
-      background: rgba(239, 68, 68, 0.45);
+      width: clamp(50px, 11vw, 60px);
+      height: clamp(50px, 11vw, 60px);
+      background: rgba(239, 68, 68, 0.5);
       border-color: #ef4444;
     }
 
     .touch-btn-brake:active,
     .touch-btn-brake.active {
-      background: rgba(239, 68, 68, 0.75);
-      border-color: #f87171;
-      box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
+      background: rgba(239, 68, 68, 0.85) !important;
+      border-color: #f87171 !important;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
     }
 
-    .touch-btn-fire {
-      width: clamp(56px, 12.5vw, 68px);
-      height: clamp(56px, 12.5vw, 68px);
-      background: rgba(245, 158, 11, 0.5);
-      border-color: #f59e0b;
+    /* Smash Karts Signature Large Center-Right Fire Button */
+    .smash-fire-btn {
+      width: clamp(70px, 15.5vw, 86px) !important;
+      height: clamp(70px, 15.5vw, 86px) !important;
+      border-radius: 50% !important;
+      background: radial-gradient(circle at 35% 35%, #ef4444, #991b1b) !important;
+      border: 3px solid #facc15 !important;
+      box-shadow: 0 0 22px rgba(239, 68, 68, 0.65), 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+      position: relative;
       margin-bottom: 2px;
-      animation: fireBtnGlow 2s infinite alternate;
+      touch-action: none;
     }
 
-    @keyframes fireBtnGlow {
-      from {
-        box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
-      }
+    .smash-fire-btn.has-weapon {
+      animation: smashWeaponPulse 1.2s infinite alternate ease-in-out !important;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.85), 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+    }
 
-      to {
-        box-shadow: 0 0 22px rgba(245, 158, 11, 0.7);
+    .smash-fire-btn .touch-icon {
+      font-size: clamp(26px, 5.5vw, 34px) !important;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    }
+
+    .smash-fire-btn .touch-label {
+      font-size: 9px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.8px;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    .touch-ammo-pill {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #fbbf24;
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1.5px solid #fff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes smashWeaponPulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.06); filter: brightness(1.25); }
+    }
+
+    /* Smash Karts Virtual Analog Joystick */
+    .virtual-joystick-wrap {
+      width: clamp(100px, 22vw, 126px);
+      height: clamp(100px, 22vw, 126px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      pointer-events: auto;
+    }
+
+    .joystick-base {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.72);
+      border: 2px solid rgba(56, 189, 248, 0.45);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.25), inset 0 0 16px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      touch-action: none;
+    }
+
+    .joystick-stick {
+      width: 46%;
+      height: 46%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #38bdf8, #0284c7);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.8), 0 4px 10px rgba(0, 0, 0, 0.4);
+      position: absolute;
+      transform: translate(0px, 0px);
+      transition: transform 0.05s ease-out;
+      pointer-events: none;
+    }
+
+    .touch-btn-attack .touch-icon,
+    .touch-btn-fire .touch-icon {
+      font-size: clamp(22px, 4.8vw, 28px);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    }
+
+    .touch-btn-attack .touch-label,
+    .touch-btn-fire .touch-label {
+      font-size: 8.5px;
+      font-weight: 900;
+      letter-spacing: 0.8px;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    @keyframes attackBtnGlow {
+      from {
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), 0 0 18px rgba(245, 158, 11, 0.35);
+        transform: scale(1);
       }
+      to {
+        box-shadow: 0 0 22px rgba(239, 68, 68, 0.8), 0 0 30px rgba(245, 158, 11, 0.6);
+        transform: scale(1.04);
+      }
+    }
+
+    .touch-btn-attack.active-weapon {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(234, 88, 12, 0.95));
+      border-color: #ffffff;
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.95), 0 0 40px rgba(245, 158, 11, 0.8);
     }
 
     .touch-btn-fire:active,
-    .touch-btn-fire.active {
-      background: rgba(239, 68, 68, 0.7);
-      border-color: #fbbf24;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
+    .touch-btn-fire.active,
+    .touch-btn-attack:active,
+    .touch-btn-attack.active {
+      transform: scale(0.92) !important;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.98), rgba(217, 119, 6, 0.98)) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.95) !important;
     }
 
     /* Results Podium */
@@ -2470,50 +2663,50 @@
       justify-content: center;
       align-items: flex-end;
       gap: clamp(6px, 1.8vw, 10px);
-      margin: clamp(12px, 2.5vw, 18px) 0 clamp(14px, 2.8vw, 20px);
-      height: clamp(90px, 18vh, 120px);
+      margin: clamp(10px, 2vw, 16px) 0;
+      height: clamp(85px, 16vh, 115px);
     }
 
     .podium-step {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: clamp(62px, 23vw, 85px);
+      width: clamp(60px, 22vw, 84px);
       border-radius: 12px 12px 0 0;
       color: #fff;
       font-weight: 800;
-      font-size: clamp(11px, 2vw, 13px);
-      padding-top: 6px;
+      font-size: clamp(10.5px, 2vw, 12.5px);
+      padding-top: 5px;
     }
 
     .podium-1 {
-      height: clamp(80px, 16vh, 105px);
+      height: clamp(75px, 15vh, 100px);
       background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
       order: 2;
       box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
     }
 
     .podium-2 {
-      height: clamp(60px, 13vh, 80px);
+      height: clamp(55px, 12vh, 75px);
       background: linear-gradient(180deg, #94a3b8 0%, #475569 100%);
       order: 1;
     }
 
     .podium-3 {
-      height: clamp(45px, 10vh, 60px);
+      height: clamp(42px, 9vh, 55px);
       background: linear-gradient(180deg, #d97706 0%, #78350f 100%);
       order: 3;
     }
 
     .stats-table {
       width: 100%;
-      margin-bottom: clamp(12px, 2.5vw, 20px);
+      margin-bottom: clamp(10px, 2vw, 18px);
       border-collapse: collapse;
-      font-size: clamp(11.5px, 2.2vw, 13px);
+      font-size: clamp(11px, 2vw, 12.5px);
     }
 
     .stats-table td {
-      padding: clamp(4px, 1vw, 6px) 0;
+      padding: clamp(3px, 0.8vw, 5px) 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       color: #cbd5e1;
       text-align: left;
@@ -2536,64 +2729,65 @@
 
     body.touch-mode-active #radarContainer {
       position: absolute;
-      bottom: calc(138px + var(--sab));
-      left: calc(8px + var(--sal));
-      width: clamp(70px, 14vw, 88px);
-      height: clamp(70px, 14vw, 88px);
+      bottom: calc(108px + var(--sab));
+      left: max(16px, calc(var(--sal) + 8px));
+      width: clamp(64px, 11vw, 76px);
+      height: clamp(64px, 11vw, 76px);
+      z-index: 15;
     }
 
     body.touch-mode-active .gauges-card {
       position: absolute;
-      bottom: calc(148px + var(--sab));
-      right: calc(8px + var(--sar));
-      padding: 6px 10px;
+      bottom: calc(118px + var(--sab));
+      right: max(16px, calc(var(--sar) + 8px));
+      padding: 4px 10px;
       min-width: auto;
+      border-radius: 12px;
+      z-index: 15;
     }
 
     body.touch-mode-active .combat-cluster {
       position: absolute;
-      bottom: calc(8px + var(--sab));
+      bottom: max(10px, calc(var(--sab) + 4px));
       left: 50%;
       transform: translateX(-50%);
-      width: min(44vw, 210px);
-      gap: 4px;
+      width: auto;
+      min-width: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      pointer-events: auto;
+      z-index: 15;
     }
 
-    body.touch-mode-active .weapon-slot-card {
-      padding: 4px 8px;
-      gap: 6px;
-      border-radius: 12px;
-      width: 100%;
+    body.touch-mode-active .hud-circle-weapon-btn {
+      width: clamp(52px, 10vw, 64px);
+      height: clamp(52px, 10vw, 64px);
+      border-width: 2.5px;
     }
 
-    body.touch-mode-active .weapon-icon-box {
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
-      border-radius: 8px;
+    body.touch-mode-active .hud-circle-weapon-btn #weaponIcon {
+      font-size: clamp(22px, 4.5vw, 30px);
+    }
+
+    body.touch-mode-active .hud-action-label {
+      font-size: 8px;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
     }
 
     body.touch-mode-active .weapon-name {
       font-size: 11px;
     }
 
-    body.touch-mode-active .weapon-hint {
-      font-size: 8.5px;
-    }
-
-    body.touch-mode-active .health-bar-container {
-      width: 100%;
-      height: 10px;
-      border-radius: 6px;
-    }
-
     /* Small screens / Phones (Portrait & Landscape <= 820px) */
     @media (max-width: 820px) {
       .leaderboard-widget {
-        min-width: 115px;
-        max-width: 145px;
-        padding: 5px 8px;
-        font-size: 10.5px;
+        min-width: 110px;
+        max-width: 140px;
+        padding: 4px 8px;
+        font-size: 10px;
         border-radius: 10px;
       }
 
@@ -2602,35 +2796,74 @@
       }
 
       .match-timer-badge {
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 12px;
       }
 
       .timer-text {
-        font-size: 20px;
+        font-size: 18px;
       }
 
       .timer-sub {
-        font-size: 8.5px;
+        font-size: 8px;
       }
 
       #killfeed {
-        max-width: 160px;
+        max-width: 150px;
       }
 
       #killfeed .kill-item:nth-child(n+3) {
         display: none;
       }
 
-      .hud-btn {
-        padding: 4px 8px;
-        font-size: 11px;
-        min-height: 32px;
-      }
-
       .stat-pill {
-        padding: 3px 6px;
-        font-size: 10px;
+        padding: 2px 6px;
+        font-size: 9.5px;
+      }
+    }
+
+    /* Tablets (iPad, Galaxy Tab, 768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .touch-btn-steer {
+        width: 62px;
+        height: 62px;
+      }
+      .touch-btn-drift {
+        width: 132px;
+        height: 42px;
+      }
+      .touch-btn-gas {
+        width: 72px;
+        height: 72px;
+      }
+      .touch-btn-brake {
+        width: 58px;
+        height: 58px;
+      }
+      .touch-btn-attack {
+        width: 72px;
+        height: 72px;
+      }
+      body.touch-mode-active #radarContainer {
+        bottom: calc(125px + var(--sab));
+        left: max(20px, calc(var(--sal) + 12px));
+        width: 82px;
+        height: 82px;
+      }
+      body.touch-mode-active .gauges-card {
+        bottom: calc(135px + var(--sab));
+        right: max(20px, calc(var(--sar) + 12px));
+        padding: 6px 12px;
+      }
+      .panel {
+        width: min(88vw, 620px);
+      }
+      .turbo-left-sidebar {
+        width: 210px;
+      }
+      .turbo-giant-play-btn {
+        padding: 10px 48px;
+        font-size: 28px;
       }
     }
 
@@ -2641,9 +2874,9 @@
       }
 
       .leaderboard-widget {
-        min-width: 95px;
-        max-width: 120px;
-        padding: 4px 6px;
+        min-width: 90px;
+        max-width: 115px;
+        padding: 3px 6px;
       }
 
       .leaderboard-title {
@@ -2652,7 +2885,7 @@
       }
 
       .leader-row {
-        font-size: 9.5px;
+        font-size: 9px;
       }
 
       .hud-btn span {
@@ -2660,82 +2893,180 @@
       }
 
       .hud-btn {
-        padding: 4px 8px;
+        padding: 3px 6px;
       }
     }
 
     /* Handheld / Mobile Landscape (Compact height <= 520px) */
-    @media (max-height: 520px) {
+    @media (max-height: 520px) and (orientation: landscape) {
       .overlay {
-        padding: max(6px, var(--sat)) max(8px, var(--sar)) max(6px, var(--sab)) max(8px, var(--sal));
+        padding: max(4px, var(--sat)) max(8px, var(--sar)) max(4px, var(--sab)) max(8px, var(--sal));
       }
 
       .panel {
-        max-height: min(94vh, 94dvh);
+        max-height: min(92vh, 92dvh);
         padding: 10px 16px;
       }
 
-      .logo-badge {
-        padding: 2px 8px;
-        font-size: 9px;
-        margin-bottom: 2px;
+      /* In-Game HUD adjustments in Landscape */
+      .hud-top {
+        gap: 6px;
       }
 
-      h1.title {
-        font-size: 20px;
+      .hud-rank-pill {
+        padding: 3px 10px;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .hud-squircle-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 13px;
+      }
+
+      .hud-center-cluster {
+        gap: 6px;
+      }
+
+      .hud-pill {
+        padding: 3px 10px;
+        font-size: 11px;
+      }
+
+      .health-gauge-track {
+        width: 65px;
+        height: 9px;
+      }
+
+      .match-time-num {
+        font-size: 13px;
+      }
+
+      .leaderboard-widget {
+        min-width: 105px;
+        max-width: 135px;
+        padding: 4px 8px;
+        font-size: 9.5px;
+      }
+
+      .leaderboard-widget .leader-row:nth-child(n+4) {
+        display: none;
+      }
+
+      #killfeed {
+        max-width: 140px;
+      }
+
+      #killfeed .kill-item:nth-child(n+3) {
+        display: none;
+      }
+
+      /* Modals in Landscape */
+      #pauseOverlay .panel {
+        max-width: 460px;
+        padding: 12px 18px;
+      }
+
+      #pauseOverlay .title {
+        font-size: 20px !important;
+        margin: 2px 0 !important;
+      }
+
+      #pauseOverlay .subtitle {
+        font-size: 11px !important;
+        margin-bottom: 8px !important;
+      }
+
+      #pauseOverlay .menu-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px !important;
+      }
+
+      #pauseOverlay .btn {
+        padding: 8px 12px;
+        font-size: 11.5px;
+        min-height: 36px;
+      }
+
+      /* Podium Victory Screen in Landscape */
+      #overOverlay .panel {
+        max-width: 680px;
+        width: min(94vw, 680px);
+        padding: 10px 18px;
+      }
+
+      #overOverlay .title {
+        font-size: 18px;
         margin: 2px 0;
       }
 
-      p.subtitle {
-        font-size: 11px;
+      #overOverlay .subtitle {
+        font-size: 10.5px;
         margin-bottom: 6px;
       }
 
-      .player-profile-bar {
-        padding: 5px 8px;
-        margin-bottom: 6px;
+      .podium-results-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 16px;
+        align-items: center;
       }
 
-      .auto-arena-card {
-        padding: 5px 8px;
+      .podium-container {
+        margin: 0;
+        height: 95px;
+      }
+
+      .podium-1 { height: 85px; }
+      .podium-2 { height: 65px; }
+      .podium-3 { height: 50px; }
+
+      .stats-table {
         margin-bottom: 8px;
+        font-size: 11px;
       }
 
-      .auto-arena-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 18px;
+      .stats-table td {
+        padding: 2.5px 0;
       }
 
-      .menu-actions {
-        gap: 6px;
-        margin-top: 6px;
-      }
-
-      button.btn {
-        padding: 7px 12px;
-        min-height: 36px;
-        font-size: 11.5px;
+      /* Garage in Landscape */
+      #garageOverlay .panel {
+        max-width: 720px;
+        width: min(94vw, 720px);
+        padding: 10px 16px;
       }
 
       .garage-section {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+      }
+
+      .garage-section-title {
+        font-size: 9.5px;
+        margin-bottom: 4px;
       }
 
       .selection-chips {
-        grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
         gap: 5px;
       }
 
       .chip-btn {
-        padding: 4px;
-        min-height: 34px;
-        font-size: 10px;
+        padding: 3px 4px;
+        min-height: 32px;
+        font-size: 9.5px;
       }
 
       .chip-btn .icon {
         font-size: 14px;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
+      }
+
+      .color-swatches {
+        gap: 6px;
       }
 
       .color-swatch {
@@ -2743,47 +3074,210 @@
         height: 24px;
       }
 
+      /* Settings in Landscape */
+      #settingsOverlay .panel {
+        max-width: 660px;
+        width: min(94vw, 660px);
+        padding: 10px 16px;
+      }
+
       .settings-group {
-        padding: 8px;
-        margin-bottom: 8px;
+        padding: 6px 10px;
+        margin-bottom: 6px;
       }
 
       .settings-row {
-        padding: 3px 0;
-        font-size: 11px;
+        padding: 2.5px 0;
+        font-size: 10.5px;
       }
 
-      .leaderboard-widget .leader-row:nth-child(n+4) {
-        display: none;
+      .settings-row select,
+      .settings-row input {
+        font-size: 10.5px;
+        padding: 2px 6px;
+      }
+
+      /* Multiplayer in Landscape */
+      #multiplayerOverlay .panel {
+        max-width: 600px;
+        width: min(94vw, 600px);
+        padding: 10px 16px;
+      }
+
+      .lobby-players-list {
+        max-height: 75px;
+      }
+
+      /* Auth in Landscape */
+      #authOverlay .panel {
+        max-width: 480px;
+        width: min(94vw, 480px);
+        padding: 10px 16px;
+      }
+
+      #authOverlay .settings-group {
+        margin-bottom: 8px;
+        padding: 6px 10px;
+      }
+
+      #authOverlay input {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
       }
     }
 
-    /* Two-column Main Menu Card for Landscape Gaming */
-    @media (max-height: 520px) and (orientation: landscape) {
-      #menuOverlay .panel {
-        width: min(96vw, 680px);
-        display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        gap: 12px;
-        align-items: center;
-        text-align: left;
-      }
+    /* ==========================================================================
+       DEVICE-ADAPTIVE CONTROLS & UI STYLES (Desktop, Mobile, Tablet)
+       ========================================================================== */
+    .desktop-control-bar {
+      position: absolute;
+      top: max(10px, calc(var(--sat) + 6px));
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 5px 16px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+      z-index: 12;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+    }
 
-      #menuOverlay .panel .menu-brand-section {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
+    .desktop-control-bar .control-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-      #menuOverlay .panel .menu-actions {
-        margin-top: 0;
-      }
+    .desktop-control-bar kbd {
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 900;
+      color: #38bdf8;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .desktop-control-bar .gp-key {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 1px solid #34d399;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #ffffff;
+      box-shadow: 0 1px 4px rgba(16, 185, 129, 0.4);
+    }
+
+    .tilt-steer-badge {
+      position: absolute;
+      top: max(12px, calc(var(--sat) + 8px));
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 12px;
+      background: rgba(16, 185, 129, 0.88);
+      border: 1.5px solid #34d399;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.65);
+      z-index: 12;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* 1. Desktop Profile Rules */
+    body.device-desktop #mobileControls {
+      display: none !important;
+    }
+    body.device-desktop #desktopControlBar:not(.hidden) {
+      display: flex;
+    }
+    body.device-desktop .hud-circle-weapon-btn {
+      width: 72px;
+      height: 72px;
+    }
+
+    /* 2. Mobile Profile Rules (Phones & Compact Screens) */
+    body.device-mobile #desktopControlBar,
+    body.device-mobile #gamepadControlBar {
+      display: none !important;
+    }
+    body.device-mobile .leaderboard-widget {
+      max-height: 86px;
+    }
+    body.device-mobile .leaderboard-row:nth-child(n+4) {
+      display: none !important; /* Top 3 racers on mobile phones */
+    }
+
+    /* 3. Tablet Profile Rules (iPad & Large Tablets) */
+    body.device-tablet #desktopControlBar {
+      display: none;
+    }
+    body.device-tablet .touch-cluster-left {
+      left: max(26px, calc(var(--sal) + 16px));
+      bottom: max(20px, calc(var(--sab) + 10px));
+      gap: 10px;
+    }
+    body.device-tablet .touch-cluster-right {
+      right: max(26px, calc(var(--sar) + 16px));
+      bottom: max(20px, calc(var(--sab) + 10px));
+      gap: 10px;
+    }
+    body.device-tablet .touch-btn-steer {
+      width: 68px;
+      height: 68px;
+    }
+    body.device-tablet .touch-btn-gas {
+      width: 78px;
+      height: 78px;
+    }
+    body.device-tablet .touch-btn-brake {
+      width: 64px;
+      height: 64px;
+    }
+    body.device-tablet .touch-btn-attack {
+      width: 76px;
+      height: 76px;
+    }
+    body.device-tablet .touch-btn-drift {
+      width: 144px;
+      height: 44px;
+    }
+    body.device-tablet #radarContainer {
+      width: 96px;
+      height: 96px;
+    }
+    body.device-tablet .leaderboard-row:nth-child(n+6) {
+      display: none !important; /* Top 5 on tablets */
     }
   </style>
 </head>
 
 <body>
-  <!-- Android Landscape Orientation Prompt -->
+  <!-- Android & Mobile Landscape Orientation Enforcer (Real Game Blocker) -->
   <div id="androidRotateOverlay" class="hidden">
     <div class="rotate-card">
       <div class="rotate-phone-anim">
@@ -2792,12 +3286,20 @@
         </div>
         <div class="rotate-arrow">↻</div>
       </div>
-      <span class="logo-badge">🏎️ Android Battle Mode</span>
-      <h2 class="rotate-title">Turn your screen Horizontal</h2>
-      <p class="rotate-subtitle">Rotate your phone to landscape for full battle vision, dual thumb controls, and arena combat action!</p>
-      <button id="dismissRotateBtn" class="btn btn-secondary" style="margin-top: 14px; padding: 8px 18px; font-size: 12px;">
-        <span>Continue in Vertical Anyway</span>
-      </button>
+      <span class="logo-badge" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">🏎️ LANDSCAPE ONLY</span>
+      <h2 class="rotate-title">TURN HORIZONTAL TO PLAY</h2>
+      <p class="rotate-subtitle">Turbo Kart requires a horizontal landscape screen. Turn your phone sideways to unlock the race arena & dual thumb controls.</p>
+      
+      <div class="rotate-status-pill">
+        <span class="status-dot-pulse"></span>
+        <span>Rotate device sideways to begin</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 14px;">
+        <button id="enterLandscapeBtn" class="btn btn-primary" style="padding: 12px 18px; font-size: 13.5px; width: 100%;">
+          <span>⛶ Rotate & Enter Fullscreen</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2861,6 +3363,27 @@
     <!-- Center Announcer Banner -->
     <div id="announcerBanner">SMASH!</div>
 
+    <!-- Desktop Keyboard / Gamepad Control Guide (Visible on Desktop) -->
+    <div id="desktopControlBar" class="desktop-control-bar">
+      <span class="control-badge"><kbd>W</kbd><kbd>↑</kbd> Drive</span>
+      <span class="control-badge"><kbd>S</kbd><kbd>↓</kbd> Brake</span>
+      <span class="control-badge"><kbd>A</kbd><kbd>D</kbd> Steer</span>
+      <span class="control-badge"><kbd>SPACE</kbd> Fire</span>
+      <span class="control-badge"><kbd>SHIFT</kbd> Drift</span>
+      <span class="control-badge"><kbd>R</kbd> Reset</span>
+    </div>
+    <div id="gamepadControlBar" class="desktop-control-bar hidden">
+      <span class="control-badge"><span class="gp-key">RT</span> Drive</span>
+      <span class="control-badge"><span class="gp-key">LT</span> Brake</span>
+      <span class="control-badge"><span class="gp-key">LS</span> Steer</span>
+      <span class="control-badge"><span class="gp-key">A/X</span> Fire</span>
+      <span class="control-badge"><span class="gp-key">RB</span> Drift</span>
+      <span class="control-badge"><span class="gp-key">START</span> Pause</span>
+    </div>
+    <div id="tiltSteerIndicator" class="tilt-steer-badge hidden">
+      <span>📱 Tilt Steering Active</span>
+    </div>
+
     <!-- Bottom Row -->
     <div class="hud-bottom">
       <div id="radarContainer">
@@ -2869,12 +3392,13 @@
 
       <!-- Center/Right Weapon Fire Circle Button -->
       <div class="combat-cluster">
-        <div id="weaponSlot" class="hud-circle-weapon-btn" title="Click or Press Space to Fire">
+        <div id="weaponSlot" class="hud-circle-weapon-btn" title="Press Space or Tap to Attack">
           <span id="weaponIcon">❓</span>
           <span id="weaponAmmo" class="weapon-ammo-badge hidden">1</span>
-          <span class="hud-action-label">FIRE</span>
+          <span class="hud-action-label">SPACE / ATTACK</span>
         </div>
         <div id="weaponName" class="weapon-name" style="font-size:12px; margin-top:2px;">? Box</div>
+        <div id="weaponHint" class="weapon-hint" style="display:none;"></div>
       </div>
 
       <div class="gauges-card">
@@ -2889,10 +3413,11 @@
     </div>
   </div>
 
-  <!-- Mobile Touch Controls -->
-  <div id="mobileControls" class="hidden">
+  <!-- Smash Karts Style Mobile Touch Controls -->
+  <div id="mobileControls" class="hidden" style="--touch-scale: 1; --touch-opacity: 0.75;">
+    <!-- Left Hand: Dual Chevrons OR Virtual Analog Joystick -->
     <div class="touch-cluster-left">
-      <div class="touch-steer-row">
+      <div id="steerButtonsGroup" class="touch-steer-row">
         <div id="touchLeft" class="touch-btn touch-btn-steer" aria-label="Steer Left">
           <span class="touch-icon">◀</span>
         </div>
@@ -2900,18 +3425,25 @@
           <span class="touch-icon">▶</span>
         </div>
       </div>
-      <div id="touchDrift" class="touch-btn touch-btn-drift" aria-label="Drift Turbo">
-        <span class="touch-icon">🌀</span>
-        <span class="touch-label">DRIFT</span>
+      <div id="virtualJoystickGroup" class="virtual-joystick-wrap hidden">
+        <div id="joystickBase" class="joystick-base">
+          <div id="joystickStick" class="joystick-stick"></div>
+        </div>
       </div>
     </div>
 
+    <!-- Right Hand: Smash Karts Action Cluster (Big Fire + Drift + Gas + Reverse) -->
     <div class="touch-cluster-right">
-      <div id="touchFire" class="touch-btn touch-btn-fire" aria-label="Fire Weapon">
-        <span class="touch-icon">🚀</span>
-        <span class="touch-label">FIRE</span>
+      <div id="touchAttack" class="touch-btn touch-btn-attack smash-fire-btn" aria-label="Attack / Fire Weapon" title="Tap to Fire Weapon">
+        <span class="touch-icon" id="touchAttackIcon">❓</span>
+        <span class="touch-label" id="touchAttackLabel">FIRE</span>
+        <span id="touchAttackAmmo" class="touch-ammo-pill hidden">1</span>
       </div>
-      <div class="touch-pedals-row">
+      <div class="touch-action-row">
+        <div id="touchDrift" class="touch-btn touch-btn-drift" aria-label="Drift Turbo">
+          <span class="touch-icon">🌀</span>
+          <span class="touch-label">DRIFT</span>
+        </div>
         <div id="touchBrake" class="touch-btn touch-btn-brake" aria-label="Reverse / Brake">
           <span class="touch-icon">▼</span>
           <span class="touch-label">REV</span>
@@ -3007,6 +3539,9 @@
           <span class="turbo-btn-chevron-svg">
             <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
           </span>
+        </button>
+        <button id="menuFullscreenBtn" class="turbo-header-btn turbo-fs-btn" title="Toggle Landscape Fullscreen" aria-label="Toggle Fullscreen">
+          <span class="turbo-btn-icon-svg" style="font-size: 15px; font-weight: 900;">⛶</span>
         </button>
       </div>
     </header>
@@ -3452,16 +3987,184 @@
           <input type="range" id="settingSensitivity" min="50" max="150" value="100" />
         </div>
         <div class="settings-row">
-          <span class="label">Touch Controls</span>
+          <span class="label">Device Profile</span>
+          <select id="settingDeviceProfile">
+            <option value="auto" selected>Auto-Detect (Adaptive)</option>
+            <option value="desktop">🖥️ Desktop (Keyboard & Gamepad)</option>
+            <option value="mobile">📱 Android & Mobile (Touch & Tilt)</option>
+            <option value="tablet">📲 Tablet (Wide Touch & Hybrid)</option>
+          </select>
+        </div>
+        <div class="settings-row" id="settingGyroRow">
+          <span class="label">Tilt Steering (Gyroscope)</span>
+          <select id="settingGyroSteering">
+            <option value="off" selected>Disabled (Touch Buttons)</option>
+            <option value="on">Enabled (Tilt Device to Steer)</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <span class="label">Touch Controls Overlay</span>
           <select id="settingTouchControls">
-            <option value="auto" selected>Auto (Touch devices)</option>
-            <option value="on">Always On</option>
-            <option value="off">Off (Keyboard only)</option>
+            <option value="auto" selected>Auto (Based on Profile)</option>
+            <option value="on">Always Force On</option>
+            <option value="off">Always Force Off</option>
+          </select>
+        </div>
+        <div class="settings-row" id="settingMobileSteerRow">
+          <span class="label">Touch Steering Style</span>
+          <select id="settingMobileSteerMode">
+            <option value="buttons" selected>Classic Buttons (◀ ▶)</option>
+            <option value="joystick">Virtual Analog Joystick (🕹️)</option>
+          </select>
+        </div>
+        <div class="settings-row" id="settingAutoDriveRow">
+          <span class="label">Auto-Drive (Forward)</span>
+          <select id="settingAutoDrive">
+            <option value="off" selected>Off (Manual Gas/Rev)</option>
+            <option value="on">On (Smash Karts Auto-Drive)</option>
+          </select>
+        </div>
+        <div class="settings-row" id="settingTouchSizeRow">
+          <span class="label">Touch Controls Size</span>
+          <select id="settingTouchSize">
+            <option value="100" selected>Normal (100%)</option>
+            <option value="115">Large (115%)</option>
+            <option value="88">Compact (88%)</option>
+          </select>
+        </div>
+        <div class="settings-row" id="settingTouchOpacityRow">
+          <span class="label">Touch Buttons Opacity</span>
+          <select id="settingTouchOpacity">
+            <option value="75" selected>Standard (75%)</option>
+            <option value="95">Vibrant (95%)</option>
+            <option value="50">Subtle (50%)</option>
           </select>
         </div>
       </div>
 
+      <!-- Admin & Analytics Dashboard Access -->
+      <div class="settings-group" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.06); text-align: left;">
+        <div class="garage-section-title" style="color: #f59e0b;">Admin Operations & Analytics</div>
+        <p style="font-size: 11.5px; color: #cbd5e1; margin-bottom: 8px;">
+          Separate analytic dashboard to track site traffic, registered players, Android, Desktop, and Other device telemetry.
+        </p>
+        <a href="/admin" target="_blank" class="btn btn-primary" style="width: 100%; text-decoration: none; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span>📊</span> Open Admin Analytics Dashboard
+        </a>
+      </div>
+
       <button class="btn btn-primary close-modal-btn" style="width:100%;">Save Settings</button>
+    </div>
+  </div>
+
+  <!-- SUPABASE RACER AUTH & CLOUD PROGRESS MODAL -->
+  <div id="authOverlay" class="overlay hidden">
+    <div class="panel" style="max-width: 440px;">
+      <div class="dialog-header">
+        <div class="dialog-title" id="authModalHeaderTitle">🏎️ Racer Cloud Account</div>
+        <button class="close-icon-btn close-modal-btn" id="closeAuthModalBtn">✕</button>
+      </div>
+
+      <!-- Logged-Out View (Tabs for Sign In and Sign Up) -->
+      <div id="authLoggedOutView">
+        <!-- Tab selector -->
+        <div style="display: flex; background: rgba(15,23,42,0.8); border: 1px solid var(--glass-border); border-radius: 12px; padding: 4px; margin-bottom: 16px;">
+          <button type="button" id="tabSignInBtn" class="btn" style="flex:1; background: var(--primary); color:#000; font-weight:800; border-radius:8px; font-size:12px;">Sign In</button>
+          <button type="button" id="tabSignUpBtn" class="btn" style="flex:1; background: transparent; color:#94a3b8; font-weight:700; border-radius:8px; font-size:12px;">Create Account</button>
+        </div>
+
+        <!-- Sign In Form -->
+        <form id="signInForm">
+          <p class="subtitle" style="margin-bottom: 12px; font-size: 12px;">
+            Sign in to load your saved coins, gems, level progress, and custom karts across any device!
+          </p>
+          <div class="settings-group" style="text-align: left; margin-bottom: 14px;">
+            <div style="margin-bottom: 10px;">
+              <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">Email Address</label>
+              <input type="email" id="loginEmailInput" placeholder="racer@example.com" required
+                style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; color:#fff; font-size:13.5px; outline:none;" />
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">Password</label>
+              <input type="password" id="loginPasswordInput" placeholder="••••••••" required
+                style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; color:#fff; font-size:13.5px; outline:none;" />
+            </div>
+          </div>
+          <button type="submit" id="submitLoginBtn" class="btn btn-primary" style="width:100%; font-size:13px; padding:11px;">
+            <span>🔑</span> Sign In & Load Progress
+          </button>
+        </form>
+
+        <!-- Sign Up Form (Initially hidden) -->
+        <form id="signUpForm" class="hidden">
+          <p class="subtitle" style="margin-bottom: 12px; font-size: 12px;">
+            Create your racer profile. You'll instantly receive <strong>100 Coins 🪙</strong> &amp; <strong>25 Gems 💎</strong>!
+          </p>
+          <div class="settings-group" style="text-align: left; margin-bottom: 14px;">
+            <div style="margin-bottom: 10px;">
+              <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">Racer Nickname *</label>
+              <input type="text" id="signupUsernameInput" maxlength="14" placeholder="e.g. ApexDrifter" required
+                style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; color:#fbbf24; font-weight:800; font-size:14px; outline:none;" />
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">Email Address *</label>
+              <input type="email" id="signupEmailInput" placeholder="racer@example.com" required
+                style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; color:#fff; font-size:13.5px; outline:none;" />
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; margin-bottom:4px;">Create Password * (Min 6 chars)</label>
+              <input type="password" id="signupPasswordInput" minlength="6" placeholder="••••••••" required
+                style="width:100%; background:rgba(15,23,42,0.9); border:1px solid var(--glass-border); border-radius:10px; padding:10px 12px; color:#fff; font-size:13.5px; outline:none;" />
+            </div>
+          </div>
+          <button type="submit" id="submitSignupBtn" class="btn btn-primary" style="width:100%; font-size:13px; padding:11px;">
+            <span>🚀</span> Create Account &amp; Save Progress
+          </button>
+        </form>
+
+        <div id="authStatusMsg" style="margin-top:12px; font-size:12px; font-weight:700; text-align:center; display:none;"></div>
+      </div>
+
+      <!-- Logged-In Profile View -->
+      <div id="authLoggedInView" class="hidden" style="text-align: left;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(30,41,59,0.5); border: 1px solid var(--glass-border); border-radius: 14px; margin-bottom: 16px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #0284c7, #1e40af); display: grid; place-items: center; font-size: 22px; border: 1.5px solid #38bdf8;">🐱</div>
+          <div style="flex: 1; min-width: 0;">
+            <div id="loggedInUsername" style="font-size: 16px; font-weight: 900; color: #fff;">Racer</div>
+            <div id="loggedInEmail" style="font-size: 11.5px; color: #94a3b8;">email@example.com</div>
+          </div>
+          <span style="font-size: 10px; font-weight: 800; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 3px 8px; border-radius: 20px;">
+            🟢 CLOUD SYNC
+          </span>
+        </div>
+
+        <div class="settings-group" style="margin-bottom: 16px;">
+          <div class="garage-section-title">Saved Cloud Progress</div>
+          <div class="settings-row">
+            <span class="label">Racer Level &amp; XP</span>
+            <span id="loggedInLevelText" style="font-weight: 800; color: #fff;">Level 1</span>
+          </div>
+          <div class="settings-row">
+            <span class="label">Coins Balance</span>
+            <span id="loggedInCoinsText" style="font-weight: 800; color: #fbbf24;">100 🪙</span>
+          </div>
+          <div class="settings-row">
+            <span class="label">Gems Balance</span>
+            <span id="loggedInGemsText" style="font-weight: 800; color: #34d399;">25 💎</span>
+          </div>
+          <div class="settings-row">
+            <span class="label">Combat Record</span>
+            <span id="loggedInCombatRecord" style="font-weight: 800; color: #cbd5e1;">0 Smashes • 0 Matches</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary close-modal-btn" style="flex: 1;">Return to Game</button>
+          <button type="button" id="authSignOutBtn" class="btn btn-secondary" style="border-color: rgba(239,68,68,0.4); color: #f87171; flex: 1;">
+            <span>🚪</span> Sign Out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3500,36 +4203,56 @@
       <h1 class="title">VICTORY PODIUM</h1>
       <p class="subtitle">Match has ended! Final rankings and combat performance:</p>
 
-      <div class="podium-container" id="podiumArea"></div>
+      <div class="podium-results-grid">
+        <div class="podium-container" id="podiumArea"></div>
 
-      <table class="stats-table">
-        <tr>
-          <td>Your Final Rank</td>
-          <td id="statRank">#1</td>
-        </tr>
-        <tr>
-          <td>Total Smashes</td>
-          <td id="statSmashes">0</td>
-        </tr>
-        <tr>
-          <td>Times Destroyed</td>
-          <td id="statDeaths">0</td>
-        </tr>
-        <tr>
-          <td>Combat Score</td>
-          <td id="statScore">0</td>
-        </tr>
-      </table>
+        <div class="podium-stats-wrap">
+          <table class="stats-table">
+            <tr>
+              <td>Your Final Rank</td>
+              <td id="statRank">#1</td>
+            </tr>
+            <tr>
+              <td>Total Smashes</td>
+              <td id="statSmashes">0</td>
+            </tr>
+            <tr>
+              <td>Times Destroyed</td>
+              <td id="statDeaths">0</td>
+            </tr>
+            <tr>
+              <td>Combat Score</td>
+              <td id="statScore">0</td>
+            </tr>
+          </table>
 
-      <div class="btn-row">
-        <button id="rematchBtn" class="btn btn-primary" style="flex:1;">Next Map Battle</button>
-        <button id="returnMenuBtn" class="btn btn-secondary" style="flex:1;">Main Menu</button>
+          <div class="btn-row">
+            <button id="rematchBtn" class="btn btn-primary" style="flex:1;">Next Map Battle</button>
+            <button id="returnMenuBtn" class="btn btn-secondary" style="flex:1;">Main Menu</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <script type="module">
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    /* ==========================================================================
+       SUPABASE CLIENT INITIALIZATION & CLOUD DATA ENGINE
+       ========================================================================== */
+    const SUPABASE_URL = "https://puewcrexmknonfzbggvx.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_TCL8-_v6qzsbWRTrjZYYpw_OpuU-T1s";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    let currentRacerUser = null;
 
     /* ==========================================================================
        STORAGE & CONFIGURATION MANAGER
@@ -3539,10 +4262,17 @@
         this.defaults = {
           username: "TurnpikeTorqu",
           chassis: "standard",
-          hat: "none",
+          hat: "crown",
           wheels: "slicks",
           trail: "flame",
-          color: 0xef4444,
+          color: 0x10b981,
+          coins: 100,
+          gems: 25,
+          level: 1,
+          xp: 0,
+          matches_played: 0,
+          smashes: 0,
+          score: 0,
           selectedMap: "stadium",
           quality: "high",
           shadows: "on",
@@ -3554,6 +4284,12 @@
           engineVol: 60,
           sensitivity: 100,
           touchControls: "auto",
+          deviceProfile: "auto",
+          gyroSteering: "off",
+          mobileSteerMode: "buttons",
+          autoDrive: "off",
+          touchSize: "100",
+          touchOpacity: "75",
           keybindings: {
             forward: "KeyW",
             backward: "KeyS",
@@ -3805,6 +4541,37 @@
           osc.stop(this.ctx.currentTime + idx * 0.04 + 0.28);
         });
       }
+
+      playBump() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(170, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(36, this.ctx.currentTime + 0.14);
+        gain.gain.setValueAtTime(0.38, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.16);
+      }
+
+      playDriftSpark(isSuper = false) {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "triangle";
+        const f = isSuper ? 1350 : 880;
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(f * 1.4, this.ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.07);
+      }
     }
 
     const sound = new AudioEngine();
@@ -3914,17 +4681,19 @@
     scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight(0xfff8eb, 1.5);
-    dirLight.position.set(120, 200, 120);
+    dirLight.position.set(60, 100, 60);
     dirLight.castShadow = config.data.shadows === "on";
     dirLight.shadow.mapSize.set(2048, 2048);
-    dirLight.shadow.camera.left = -190;
-    dirLight.shadow.camera.right = 190;
-    dirLight.shadow.camera.top = 190;
-    dirLight.shadow.camera.bottom = -190;
-    dirLight.shadow.camera.far = 480;
+    dirLight.shadow.camera.left = -65;
+    dirLight.shadow.camera.right = 65;
+    dirLight.shadow.camera.top = 65;
+    dirLight.shadow.camera.bottom = -65;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 280;
     dirLight.shadow.bias = -0.0003;
     dirLight.shadow.normalBias = 0.025;
     scene.add(dirLight);
+    scene.add(dirLight.target);
 
     const pointAccent = new THREE.PointLight(0x06b6d4, 2, 220);
     pointAccent.position.set(0, 25, 0);
@@ -4639,13 +5408,12 @@
         gantryGroup.add(createCheckeredFlag(-6.8, 7.2, 0, 0.2));
         gantryGroup.add(createCheckeredFlag(6.8, 7.2, 0, -0.2));
         arenaGroup.add(gantryGroup);
-        obstacles.push({ type: "box", minX: 8, maxX: 23, minZ: -25, maxZ: -10 });
 
         // Checkered Flags on Poles along the Left Track Perimeter
         arenaGroup.add(createCheckeredFlag(-12, 0, -11, 0.4));
         arenaGroup.add(createCheckeredFlag(-16, 0, -17, 0.3));
 
-        // Trackside Traffic Cones (seen around the podium in screenshot)
+        // Trackside Traffic Cones (decorative cones placed cleanly off the main driving raceway)
         function createTrafficCone(cx, cz) {
           const coneGroup = new THREE.Group();
           coneGroup.position.set(cx, 0, cz);
@@ -4672,64 +5440,13 @@
           arenaGroup.add(coneGroup);
         }
 
-        // Cones placed like in reference screenshot
+        // Cones placed safely off driving lanes
         createTrafficCone(9.5, -4.5);
         createTrafficCone(11.2, -3.8);
         createTrafficCone(-9.2, -4.2);
         createTrafficCone(8.0, 2.5);
 
-        // Low Red-and-White Safety Concrete Barriers near archway & track sides
-        function createStripedBarrier(bx, bz, bRotY = 0) {
-          const bMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-          const barMesh = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.85, 0.9), bMat);
-          barMesh.position.set(bx, 0.42, bz);
-          barMesh.rotation.y = bRotY;
-          barMesh.castShadow = true;
-          // Red stripes
-          const redStripe = new THREE.Mesh(
-            new THREE.BoxGeometry(1.2, 0.87, 0.92),
-            new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 })
-          );
-          barMesh.add(redStripe);
-          arenaGroup.add(barMesh);
-          obstacles.push({ type: "box", minX: bx - 1.8, maxX: bx + 1.8, minZ: bz - 0.6, maxZ: bz + 0.6 });
-        }
-        createStripedBarrier(11.5, -13.5, -0.42);
-        createStripedBarrier(14.8, -15.5, -0.42);
-        createStripedBarrier(-10.5, -9.5, 0.35);
-
-        const crateMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.9 });
-        const barrierMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5, metalness: 0.4 });
-        const stadiumBlocks = [
-          // Inner cover pylons
-          { x: -42, z: -42, w: 8, h: 4, d: 8, mat: crateMat },
-          { x: 42, z: -42, w: 8, h: 4, d: 8, mat: crateMat },
-          { x: -42, z: 42, w: 8, h: 4, d: 8, mat: crateMat },
-          { x: 42, z: 42, w: 8, h: 4, d: 8, mat: crateMat },
-          // 4 Cardinal highway barriers
-          { x: 0, z: -72, w: 42, h: 4, d: 5, mat: barrierMat },
-          { x: 0, z: 72, w: 42, h: 4, d: 5, mat: barrierMat },
-          { x: -72, z: 0, w: 5, h: 4, d: 42, mat: barrierMat },
-          { x: 72, z: 0, w: 5, h: 4, d: 42, mat: barrierMat },
-          // 4 Outer quadrant shipping hubs
-          { x: -110, z: -110, w: 20, h: 5, d: 20, mat: crateMat },
-          { x: 110, z: -110, w: 20, h: 5, d: 20, mat: crateMat },
-          { x: -110, z: 110, w: 20, h: 5, d: 20, mat: crateMat },
-          { x: 110, z: 110, w: 20, h: 5, d: 20, mat: crateMat },
-          // Outer perimeter chicane covers
-          { x: 0, z: -125, w: 24, h: 3.5, d: 4, mat: barrierMat },
-          { x: 0, z: 125, w: 24, h: 3.5, d: 4, mat: barrierMat },
-          { x: -125, z: 0, w: 4, h: 3.5, d: 24, mat: barrierMat },
-          { x: 125, z: 0, w: 4, h: 3.5, d: 24, mat: barrierMat }
-        ];
-
-        stadiumBlocks.forEach(b => {
-          const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.w, b.h, b.d), b.mat);
-          mesh.position.set(b.x, b.h / 2, b.z);
-          mesh.castShadow = true;
-          arenaGroup.add(mesh);
-          obstacles.push({ type: "box", minX: b.x - b.w / 2 - 1.2, maxX: b.x + b.w / 2 + 1.2, minZ: b.z - b.d / 2 - 1.2, maxZ: b.z + b.d / 2 + 1.2 });
-        });
+        // All wooden blocks, road-blocking obstacles, and barriers removed entirely for 100% smooth, open raceways
       }
 
       // 12 High-Speed Boost Pads distributed across lanes and avenues
@@ -4761,42 +5478,7 @@
         boostPads.push({ x: b.x, z: b.z });
       });
 
-      // Authentic Smash Karts Modular Curved Plastic Barriers (Red & Yellow)
-      const redBarrierMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.35, metalness: 0.1 });
-      const yellowBarrierMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35, metalness: 0.1 });
-      const barrierGeo = new THREE.BoxGeometry(4.2, 1.8, 1.2);
-
-      const barrierLayout = [
-        // Inner chicane barriers
-        { x: -35, z: -35, rot: 0.78, mat: redBarrierMat },
-        { x: 35, z: -35, rot: -0.78, mat: redBarrierMat },
-        { x: -35, z: 35, rot: -0.78, mat: redBarrierMat },
-        { x: 35, z: 35, rot: 0.78, mat: redBarrierMat },
-        // Midfield guide barriers
-        { x: -85, z: 0, rot: Math.PI / 2, mat: yellowBarrierMat },
-        { x: 85, z: 0, rot: Math.PI / 2, mat: yellowBarrierMat },
-        { x: 0, z: -85, rot: 0, mat: yellowBarrierMat },
-        { x: 0, z: 85, rot: 0, mat: yellowBarrierMat },
-        // Outer curve protections
-        { x: -115, z: -60, rot: 0.3, mat: redBarrierMat },
-        { x: 115, z: 60, rot: 0.3, mat: redBarrierMat },
-        { x: -60, z: 115, rot: -0.3, mat: redBarrierMat },
-        { x: 60, z: -115, rot: -0.3, mat: redBarrierMat }
-      ];
-
-      barrierLayout.forEach(b => {
-        const mesh = new THREE.Mesh(barrierGeo, b.mat);
-        mesh.position.set(b.x, 0.9, b.z);
-        mesh.rotation.y = b.rot;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        arenaGroup.add(mesh);
-        obstacles.push({
-          type: "box",
-          minX: b.x - 2.4, maxX: b.x + 2.4,
-          minZ: b.z - 2.4, maxZ: b.z + 2.4
-        });
-      });
+      // All road barriers and wooden block obstacles removed entirely for clear driving tracks
 
       if (mapId !== "stadium") {
         // Authentic Smash Karts Purple Highway Tunnel Overpass Archway (for other arenas)
@@ -5112,6 +5794,37 @@
       });
     }
 
+    function spawnDriftSparks(x, y, z, colorHex = 0x38bdf8, count = 2) {
+      for (let i = 0; i < count; i++) {
+        const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+        const mesh = new THREE.Mesh(particleGeo, mat);
+        mesh.scale.set(0.35, 0.35, 0.35);
+        mesh.position.set(x + (Math.random() - 0.5) * 0.4, y + 0.15, z + (Math.random() - 0.5) * 0.4);
+        scene.add(mesh);
+        particles.push({
+          mesh,
+          vel: new THREE.Vector3((Math.random() - 0.5) * 4, 2.5 + Math.random() * 3, (Math.random() - 0.5) * 4),
+          life: 0.25 + Math.random() * 0.15,
+          maxLife: 0.4,
+          scaleDown: true
+        });
+      }
+    }
+
+    function spawnContactSparks(x, y, z, count = 10) {
+      for (let i = 0; i < count; i++) {
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+        const mesh = new THREE.Mesh(particleGeo, mat);
+        mesh.scale.set(0.3, 0.3, 0.3);
+        mesh.position.set(x, y, z);
+        const theta = Math.random() * Math.PI * 2;
+        const speed = 7 + Math.random() * 9;
+        const vel = new THREE.Vector3(Math.cos(theta) * speed, 2.5 + Math.random() * 6, Math.sin(theta) * speed);
+        scene.add(mesh);
+        particles.push({ mesh, vel, life: 0.3 + Math.random() * 0.2, maxLife: 0.5, scaleDown: true });
+      }
+    }
+
     // Drift Skid Marks
     const skidMarks = [];
     const skidGeo = new THREE.PlaneGeometry(0.35, 1.2);
@@ -5137,7 +5850,6 @@
         p.life -= dt;
         if (p.life <= 0) {
           scene.remove(p.mesh);
-          p.mesh.geometry.dispose();
           p.mesh.material.dispose();
           particles.splice(i, 1);
           continue;
@@ -5528,8 +6240,9 @@
       const tipL = new THREE.Mesh(tipGeo, tipMat);
       tipL.position.set(0, 0.54, 0);
       exL.add(tipL);
-      const flL = new THREE.Mesh(flameGeo, flameMat);
+      const flL = new THREE.Mesh(flameGeo, flameMat.clone());
       flL.position.set(0, 0.68, 0);
+      flL.scale.set(0.001, 0.001, 0.001);
       exL.add(flL);
       group.add(exL);
 
@@ -5540,8 +6253,9 @@
       const tipR = new THREE.Mesh(tipGeo, tipMat);
       tipR.position.set(0, 0.54, 0);
       exR.add(tipR);
-      const flR = new THREE.Mesh(flameGeo, flameMat);
+      const flR = new THREE.Mesh(flameGeo, flameMat.clone());
       flR.position.set(0, 0.68, 0);
+      flR.scale.set(0.001, 0.001, 0.001);
       exR.add(flR);
       group.add(exR);
 
@@ -5604,7 +6318,7 @@
       const overhead = createOverheadPlate(name);
       group.add(overhead.sprite);
 
-      return { group, bodyMat, wheels, steerGroups, shield, hatGroup, overhead, iceCube, spikyGroup, spikyBalls };
+      return { group, bodyMat, wheels, steerGroups, shield, hatGroup, overhead, iceCube, spikyGroup, spikyBalls, flames: [flL, flR] };
     }
 
     /* ==========================================================================
@@ -5635,6 +6349,8 @@
         this.wheelSpin = 0;
         this.driftTime = 0;
         this.isDrifting = false;
+        this.driftStage = 0;
+        this.driftDir = 0;
 
         this.invulnerableTimer = 3.0;
         this.respawnTimer = 0;
@@ -5653,6 +6369,12 @@
         this.weaponCooldown = 0;
         this.nitroTimer = 0;
         this.isRollingWeapon = false;
+
+        this.stuckTimer = 0;
+        this.unstickTimer = 0;
+        this.unstickDir = (Math.random() < 0.5 ? -1 : 1);
+        this.lastX = 0;
+        this.lastZ = 0;
 
         this.targetPos = new THREE.Vector3();
         this.targetHeading = 0;
@@ -5699,6 +6421,8 @@
         this.invulnerableTimer = 3.0;
         this.nitroTimer = 0;
         this.killStreak = 0;
+        this.stuckTimer = 0;
+        this.unstickTimer = 0;
 
         const spawnAngle = Math.random() * Math.PI * 2;
         const spawnDist = 30 + Math.random() * 110;
@@ -5706,6 +6430,8 @@
         this.heading = spawnAngle + Math.PI;
         this.group.rotation.set(0, this.heading, 0);
         this.group.visible = true;
+        this.lastX = this.group.position.x;
+        this.lastZ = this.group.position.z;
 
         if (this.meshData.shield) this.meshData.shield.visible = true;
         if (this.meshData.iceCube) this.meshData.iceCube.visible = false;
@@ -5788,9 +6514,9 @@
           const iconEl = document.getElementById("weaponIcon");
           const nameEl = document.getElementById("weaponName");
           const hintEl = document.getElementById("weaponHint");
-          slot.classList.add("rolling-weapon");
-          nameEl.textContent = "Rolling Weapon...";
-          hintEl.textContent = "LOCKED IN ROULETTE";
+          if (slot) slot.classList.add("rolling-weapon");
+          if (nameEl) nameEl.textContent = "Rolling Weapon...";
+          if (hintEl) hintEl.textContent = "LOCKED IN ROULETTE";
 
           let rollTicks = 0;
           const rollInterval = setInterval(() => {
@@ -5975,36 +6701,98 @@
           }
         }
 
-        if (input.throttle > 0) this.speed += accel * dt;
-        else if (input.throttle < 0) this.speed -= 36 * dt;
-        else this.speed -= this.speed * 1.2 * dt;
+        const speedRatioAbs = Math.abs(this.speed) / effectiveMaxSpeed;
+        const torqueFactor = Math.max(0.35, 1 - speedRatioAbs * 0.65);
+
+        if (input.throttle > 0) {
+          this.speed += accel * torqueFactor * dt;
+        } else if (input.throttle < 0) {
+          this.speed -= 38 * dt;
+        } else {
+          const drag = (2.2 + Math.abs(this.speed) * 0.045) * dt;
+          if (this.speed > 0) this.speed = Math.max(0, this.speed - drag);
+          else if (this.speed < 0) this.speed = Math.min(0, this.speed + drag);
+        }
 
         this.speed = THREE.MathUtils.clamp(this.speed, -15, effectiveMaxSpeed);
 
-        this.isDrifting = !!input.drift;
-        if (this.isDrifting && Math.abs(this.speed) > 12) {
-          this.driftTime += dt;
-          if (Math.random() < 0.45) spawnSmokePuff(this.group.position.x, this.y + 0.35, this.group.position.z, 0x94a3b8);
-          if (this.driftTime > 0.8 && Math.random() < 0.3) {
-            spawnExplosionParticles(this.group.position.x, this.y + 0.35, this.group.position.z, 0x06b6d4, 2);
-          }
-          spawnSkidMark(this.group.position.x, this.group.position.z, this.heading);
-        } else {
-          if (this.driftTime > 1.2) {
-            this.speed += 16;
-            this.boostTimer = 1.4;
-            sound.playTurbo();
-            spawnExplosionParticles(this.group.position.x, this.y + 0.5, this.group.position.z, 0x06b6d4, 14);
-          }
+        // Two-Stage Mini-Turbo Drifting
+        const wantDrift = !!input.drift;
+        if (wantDrift && !this.isDrifting && Math.abs(this.speed) > 10) {
+          this.isDrifting = true;
           this.driftTime = 0;
+          this.driftStage = 0;
+          this.driftDir = input.steer < -0.1 ? -1 : (input.steer > 0.1 ? 1 : (this.steer < 0 ? -1 : 1));
+          if (this.y <= 0.05) this.jumpHop();
+        } else if (!wantDrift && this.isDrifting) {
+          if (this.driftStage === 1) {
+            this.speed = Math.min(this.speed + 11, 52);
+            this.boostTimer = 1.1;
+            sound.playTurbo();
+            spawnShockwave(this.group.position.x, this.y, this.group.position.z, 0x38bdf8);
+            if (!this.isBot && !this.isRemote) {
+              triggerScreenShake(0.18);
+              if (navigator.vibrate) navigator.vibrate(35);
+            }
+          } else if (this.driftStage === 2) {
+            this.speed = Math.min(this.speed + 19, 58);
+            this.boostTimer = 1.9;
+            sound.playTurbo();
+            spawnShockwave(this.group.position.x, this.y, this.group.position.z, 0xf97316);
+            if (!this.isBot && !this.isRemote) {
+              triggerScreenShake(0.32);
+              if (navigator.vibrate) navigator.vibrate([45, 30, 45]);
+            }
+          }
+          this.isDrifting = false;
+          this.driftTime = 0;
+          this.driftStage = 0;
+        }
+
+        if (this.isDrifting && Math.abs(this.speed) > 10) {
+          this.driftTime += dt;
+          const rearOffsetL = new THREE.Vector3(-0.9, 0.2, -1.1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.heading).add(this.group.position);
+          const rearOffsetR = new THREE.Vector3(0.9, 0.2, -1.1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.heading).add(this.group.position);
+
+          if (Math.random() < 0.45) {
+            spawnSmokePuff(rearOffsetL.x, rearOffsetL.y, rearOffsetL.z, 0x94a3b8);
+            spawnSmokePuff(rearOffsetR.x, rearOffsetR.y, rearOffsetR.z, 0x94a3b8);
+          }
+
+          if (this.driftTime >= 1.1) {
+            if (this.driftStage < 2) {
+              sound.playDriftSpark(true);
+              this.driftStage = 2;
+            }
+            if (Math.random() < 0.55) {
+              spawnDriftSparks(rearOffsetL.x, rearOffsetL.y, rearOffsetL.z, 0xf97316, 2);
+              spawnDriftSparks(rearOffsetR.x, rearOffsetR.y, rearOffsetR.z, 0xf97316, 2);
+            }
+          } else if (this.driftTime >= 0.45) {
+            if (this.driftStage < 1) {
+              sound.playDriftSpark(false);
+              this.driftStage = 1;
+            }
+            if (Math.random() < 0.55) {
+              spawnDriftSparks(rearOffsetL.x, rearOffsetL.y, rearOffsetL.z, 0x38bdf8, 2);
+              spawnDriftSparks(rearOffsetR.x, rearOffsetR.y, rearOffsetR.z, 0x38bdf8, 2);
+            }
+          }
+
+          spawnSkidMark(rearOffsetL.x, rearOffsetL.z, this.heading);
+          spawnSkidMark(rearOffsetR.x, rearOffsetR.z, this.heading);
+        } else if (!wantDrift) {
+          this.driftTime = 0;
+          this.driftStage = 0;
+          this.isDrifting = false;
         }
 
         const sens = (config.data.sensitivity / 100);
         this.steer += (input.steer * sens - this.steer) * Math.min(1, dt * 12);
 
         const speedRatio = Math.min(1, Math.abs(this.speed) / 10);
-        const turnMult = this.isDrifting ? 3.4 : 2.1;
-        this.heading += this.steer * turnMult * speedRatio * dt * (this.speed >= 0 ? 1 : -1);
+        const turnMult = this.isDrifting ? 3.3 : 2.1;
+        this.heading += (this.steer * turnMult + (this.isDrifting ? this.driftDir * 0.45 : 0)) * speedRatio * dt * (this.speed >= 0 ? 1 : -1);
 
         const forward = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading));
         this.group.position.addScaledVector(forward, this.speed * dt);
@@ -6031,6 +6819,7 @@
         this.group.position.y = this.y;
 
         this.handleObstacleCollisions();
+        this.handleKartCollisions();
 
         // Speed Boost Strips
         boostPads.forEach(pad => {
@@ -6095,9 +6884,10 @@
         }
 
         // Dynamic 3D Suspension Pitch & Roll Tilt
-        const targetPitch = this.y > 0.1 ? -Math.atan2(this.vy, Math.abs(this.speed) + 8) * 0.65 : -(input.throttle || 0) * 0.06;
+        const targetPitch = this.y > 0.1 ? -Math.atan2(this.vy, Math.abs(this.speed) + 8) * 0.65 : -(input.throttle || 0) * 0.07;
         this.pitch += (targetPitch - this.pitch) * Math.min(1, dt * 10);
-        this.roll = -this.steer * 0.20 * speedRatio;
+        const driftLean = this.isDrifting ? -this.driftDir * 0.14 : 0;
+        this.roll = -this.steer * 0.22 * speedRatio + driftLean;
 
         this.group.rotation.x = this.pitch;
         this.group.rotation.y = this.heading;
@@ -6109,6 +6899,25 @@
         this.wheelSpin += this.speed * dt * 2.2;
         for (const w of this.meshData.wheels) w.rotation.x = this.wheelSpin;
 
+        // Tailpipe Exhaust Flame Dynamic Scaling & FX
+        if (this.meshData.flames && this.meshData.flames.length) {
+          const isBoosting = this.boostTimer > 0 || this.nitroTimer > 0;
+          const isAccelerating = input.throttle > 0 && this.speed > 5;
+          for (const fl of this.meshData.flames) {
+            if (isBoosting) {
+              const flScale = 1.1 + Math.sin(performance.now() * 0.035) * 0.35;
+              fl.scale.set(flScale, flScale * 1.4, flScale);
+              fl.material.color.setHex(this.nitroTimer > 0 ? 0xa855f7 : 0x06b6d4);
+            } else if (isAccelerating) {
+              const flScale = 0.4 + Math.sin(performance.now() * 0.02) * 0.18;
+              fl.scale.set(flScale, flScale, flScale);
+              fl.material.color.setHex(0xf59e0b);
+            } else {
+              fl.scale.set(0.001, 0.001, 0.001);
+            }
+          }
+        }
+
         // Local Player HUD & Health Warning FX (Smash Karts style: clean cartoon smoke on low HP)
         if (!this.isBot && !this.isRemote) {
           if (this.hp < 30 && !this.isDead && Math.random() < 0.2) {
@@ -6119,24 +6928,52 @@
 
       handleObstacleCollisions() {
         const pos = this.group.position;
-        if (Math.abs(pos.x) > ARENA_BOUNDS) {
-          pos.x = Math.sign(pos.x) * ARENA_BOUNDS;
-          this.speed *= -0.4;
-        }
-        if (Math.abs(pos.z) > ARENA_BOUNDS) {
-          pos.z = Math.sign(pos.z) * ARENA_BOUNDS;
-          this.speed *= -0.4;
+        const pad = 2.0;
+
+        // Perimeter Walls Collision & Inward Rebound
+        if (pos.x > ARENA_BOUNDS) {
+          pos.x = ARENA_BOUNDS - pad;
+          this.speed = -Math.abs(this.speed) * 0.45;
+          if (this.isBot) {
+            this.heading = Math.PI - this.heading + (Math.random() - 0.5) * 0.5;
+            this.stuckTimer = (this.stuckTimer || 0) + 0.45;
+          }
+        } else if (pos.x < -ARENA_BOUNDS) {
+          pos.x = -ARENA_BOUNDS + pad;
+          this.speed = -Math.abs(this.speed) * 0.45;
+          if (this.isBot) {
+            this.heading = Math.PI - this.heading + (Math.random() - 0.5) * 0.5;
+            this.stuckTimer = (this.stuckTimer || 0) + 0.45;
+          }
         }
 
+        if (pos.z > ARENA_BOUNDS) {
+          pos.z = ARENA_BOUNDS - pad;
+          this.speed = -Math.abs(this.speed) * 0.45;
+          if (this.isBot) {
+            this.heading = -this.heading + (Math.random() - 0.5) * 0.5;
+            this.stuckTimer = (this.stuckTimer || 0) + 0.45;
+          }
+        } else if (pos.z < -ARENA_BOUNDS) {
+          pos.z = -ARENA_BOUNDS + pad;
+          this.speed = -Math.abs(this.speed) * 0.45;
+          if (this.isBot) {
+            this.heading = -this.heading + (Math.random() - 0.5) * 0.5;
+            this.stuckTimer = (this.stuckTimer || 0) + 0.45;
+          }
+        }
+
+        // Internal Map Obstacles with Clean Separation Padding
         for (const ob of obstacles) {
           if (ob.type === "circle") {
             const dist = Math.hypot(pos.x - ob.x, pos.z - ob.z);
-            if (dist < ob.radius) {
-              const pushX = (pos.x - ob.x) / dist;
-              const pushZ = (pos.z - ob.z) / dist;
-              pos.x = ob.x + pushX * ob.radius;
-              pos.z = ob.z + pushZ * ob.radius;
-              this.speed *= -0.5;
+            if (dist < ob.radius + 0.5) {
+              const pushX = (pos.x - ob.x) / (dist || 1);
+              const pushZ = (pos.z - ob.z) / (dist || 1);
+              pos.x = ob.x + pushX * (ob.radius + 1.2);
+              pos.z = ob.z + pushZ * (ob.radius + 1.2);
+              this.speed = -Math.abs(this.speed) * 0.4;
+              if (this.isBot) this.stuckTimer = (this.stuckTimer || 0) + 0.35;
             }
           } else if (ob.type === "box") {
             if (pos.x > ob.minX && pos.x < ob.maxX && pos.z > ob.minZ && pos.z < ob.maxZ) {
@@ -6146,12 +6983,54 @@
               const dMaxZ = Math.abs(pos.z - ob.maxZ);
               const minVal = Math.min(dMinX, dMaxX, dMinZ, dMaxZ);
 
-              if (minVal === dMinX) pos.x = ob.minX;
-              else if (minVal === dMaxX) pos.x = ob.maxX;
-              else if (minVal === dMinZ) pos.z = ob.minZ;
-              else pos.z = ob.maxZ;
-              this.speed *= -0.4;
+              if (minVal === dMinX) pos.x = ob.minX - 1.2;
+              else if (minVal === dMaxX) pos.x = ob.maxX + 1.2;
+              else if (minVal === dMinZ) pos.z = ob.minZ - 1.2;
+              else pos.z = ob.maxZ + 1.2;
+              this.speed = -Math.abs(this.speed) * 0.4;
+              if (this.isBot) this.stuckTimer = (this.stuckTimer || 0) + 0.35;
             }
+          }
+        }
+      }
+
+      handleKartCollisions() {
+        if (this.isDead) return;
+        const pos = this.group.position;
+        const RADIUS = 2.3;
+        for (const other of combatants) {
+          if (other === this || other.isDead) continue;
+          const otherPos = other.group.position;
+          const dx = pos.x - otherPos.x;
+          const dz = pos.z - otherPos.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist < RADIUS && dist > 0.001) {
+            const overlap = RADIUS - dist;
+            const nx = dx / dist;
+            const nz = dz / dist;
+
+            // Soft push separation
+            pos.x += nx * overlap * 0.5;
+            pos.z += nz * overlap * 0.5;
+            otherPos.x -= nx * overlap * 0.5;
+            otherPos.z -= nz * overlap * 0.5;
+
+            // Elastic bumper speed exchange
+            const relSpeed = this.speed - other.speed;
+            this.speed -= relSpeed * 0.42;
+            other.speed += relSpeed * 0.42;
+
+            // Visual contact sparks & audio
+            const midX = (pos.x + otherPos.x) * 0.5;
+            const midZ = (pos.z + otherPos.z) * 0.5;
+            spawnContactSparks(midX, this.y + 0.35, midZ, 6);
+            sound.playBump();
+
+            if (!this.isBot && !this.isRemote) {
+              triggerScreenShake(0.12);
+              if (navigator.vibrate) navigator.vibrate(25);
+            }
+            if (this.isBot) this.stuckTimer = (this.stuckTimer || 0) + 0.25;
           }
         }
       }
@@ -6838,46 +7717,158 @@
     function updateBotAI(bot, dt) {
       if (bot.isDead) return;
 
+      const pos = bot.group.position;
+
+      // 1. STUCK DETECTION & UNSTICK REVERSE SEQUENCE
+      const moved = Math.hypot(pos.x - (bot.lastX || pos.x), pos.z - (bot.lastZ || pos.z));
+      bot.lastX = pos.x;
+      bot.lastZ = pos.z;
+
+      // If barely moving despite throttle
+      if (moved < 0.28 && !bot.isDead) {
+        bot.stuckTimer = (bot.stuckTimer || 0) + dt;
+      } else {
+        bot.stuckTimer = Math.max(0, (bot.stuckTimer || 0) - dt * 2.5);
+      }
+
+      // If stuck for > 0.45s, trigger unstick sequence
+      if (bot.stuckTimer > 0.45 && (bot.unstickTimer || 0) <= 0) {
+        bot.unstickTimer = 1.1 + Math.random() * 0.4; // Reverse & turn away for 1.1 - 1.5s
+        // Steer away towards open arena center
+        const toCenterX = -pos.x;
+        const toCenterZ = -pos.z;
+        const angleToCenter = Math.atan2(toCenterX, toCenterZ);
+        let diff = angleToCenter - bot.heading;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        bot.unstickDir = diff >= 0 ? 1 : -1;
+        bot.stuckTimer = 0;
+      }
+
+      // If currently executing unstick maneuver: REVERSE & STEER OUT
+      if ((bot.unstickTimer || 0) > 0) {
+        bot.unstickTimer -= dt;
+        const unstickInput = {
+          throttle: -1, // Full Reverse!
+          steer: bot.unstickDir || 1,
+          drift: false
+        };
+        bot.updatePhysics(dt, unstickInput);
+        return;
+      }
+
       const input = { throttle: 1, steer: 0, drift: false };
       let targetPos = null;
 
-      if (bot.canCollectWeapon()) {
-        let nearestBox = null, minBoxDist = Infinity;
-        for (const b of mysteryBoxes) {
-          if (b.active) {
-            const d = Math.hypot(b.x - bot.group.position.x, b.z - bot.group.position.z);
-            if (d < minBoxDist) { minBoxDist = d; nearestBox = b; }
+      // 2. WALL AVOIDANCE FORCE FIELD (Steer away BEFORE hitting perimeter walls)
+      const wallBuffer = ARENA_BOUNDS - 34;
+      const isNearWall = Math.abs(pos.x) > wallBuffer || Math.abs(pos.z) > wallBuffer;
+
+      if (isNearWall) {
+        // Direct bot towards safe inner radius
+        const centerOffset = new THREE.Vector3(
+          pos.x > wallBuffer ? -70 : (pos.x < -wallBuffer ? 70 : 0),
+          0,
+          pos.z > wallBuffer ? -70 : (pos.z < -wallBuffer ? 70 : 0)
+        );
+        targetPos = pos.clone().add(centerOffset);
+      } else {
+        // 3. TARGETING: Mystery boxes when empty, nearest enemy when armed
+        if (bot.canCollectWeapon()) {
+          let nearestBox = null, minBoxDist = Infinity;
+          for (const b of mysteryBoxes) {
+            if (b.active) {
+              const d = Math.hypot(b.x - pos.x, b.z - pos.z);
+              if (d < minBoxDist) { minBoxDist = d; nearestBox = b; }
+            }
+          }
+          if (nearestBox && minBoxDist < 130) {
+            targetPos = new THREE.Vector3(nearestBox.x, 0, nearestBox.z);
           }
         }
-        if (nearestBox) targetPos = new THREE.Vector3(nearestBox.x, 0, nearestBox.z);
+
+        if (!targetPos) {
+          let nearestEnemy = null, minEnemyDist = Infinity;
+          for (const other of combatants) {
+            if (other !== bot && !other.isDead) {
+              const d = pos.distanceTo(other.group.position);
+              if (d < minEnemyDist) { minEnemyDist = d; nearestEnemy = other; }
+            }
+          }
+          if (nearestEnemy) targetPos = nearestEnemy.group.position.clone();
+        }
+
+        if (!targetPos) targetPos = new THREE.Vector3(0, 0, 0);
       }
 
-      if (!targetPos) {
-        let nearestEnemy = null, minEnemyDist = Infinity;
-        for (const other of combatants) {
-          if (other !== bot && !other.isDead) {
-            const d = bot.group.position.distanceTo(other.group.position);
-            if (d < minEnemyDist) { minEnemyDist = d; nearestEnemy = other; }
+      // 4. FORWARD PROBE SENSORS (Whiskers) FOR OBSTACLE AVOIDANCE
+      const forwardDir = new THREE.Vector3(Math.sin(bot.heading), 0, Math.cos(bot.heading));
+      const lookaheadDist = Math.max(14, bot.speed * 0.55);
+      const probeAhead = pos.clone().addScaledVector(forwardDir, lookaheadDist);
+      const probeLeft = pos.clone().addScaledVector(
+        forwardDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.55),
+        lookaheadDist * 0.8
+      );
+      const probeRight = pos.clone().addScaledVector(
+        forwardDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.55),
+        lookaheadDist * 0.8
+      );
+
+      function isBlocked(p) {
+        if (Math.abs(p.x) >= ARENA_BOUNDS - 8 || Math.abs(p.z) >= ARENA_BOUNDS - 8) return true;
+        for (const ob of obstacles) {
+          if (ob.type === "circle") {
+            if (Math.hypot(p.x - ob.x, p.z - ob.z) < ob.radius + 3.2) return true;
+          } else if (ob.type === "box") {
+            if (p.x >= ob.minX - 2.8 && p.x <= ob.maxX + 2.8 && p.z >= ob.minZ - 2.8 && p.z <= ob.maxZ + 2.8) return true;
           }
         }
-        if (nearestEnemy) targetPos = nearestEnemy.group.position;
+        return false;
       }
 
-      if (!targetPos) targetPos = new THREE.Vector3(0, 0, 0);
+      let obstacleAvoidSteer = 0;
+      if (isBlocked(probeAhead)) {
+        const leftBlocked = isBlocked(probeLeft);
+        const rightBlocked = isBlocked(probeRight);
+        if (!leftBlocked) obstacleAvoidSteer = 1.0;
+        else if (!rightBlocked) obstacleAvoidSteer = -1.0;
+        else obstacleAvoidSteer = (Math.random() < 0.5 ? 1.0 : -1.0);
+        input.throttle = 0.5; // Ease off gas to steer around tight corner
+      } else if (isBlocked(probeRight)) {
+        obstacleAvoidSteer = 0.65;
+      } else if (isBlocked(probeLeft)) {
+        obstacleAvoidSteer = -0.65;
+      }
 
-      const toTarget = targetPos.clone().sub(bot.group.position);
+      // 5. BLEND STEERING TOWARD TARGET & OBSTACLE AVOIDANCE
+      const toTarget = targetPos.clone().sub(pos);
       const desiredAngle = Math.atan2(toTarget.x, toTarget.z);
       let angleDiff = desiredAngle - bot.heading;
       while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-      input.steer = THREE.MathUtils.clamp(angleDiff * 1.5, -1, 1);
-      if (Math.abs(angleDiff) > 0.8) input.drift = true;
+      let steerVal = THREE.MathUtils.clamp(angleDiff * 1.8, -1, 1);
+      if (obstacleAvoidSteer !== 0) {
+        steerVal = obstacleAvoidSteer;
+      }
 
+      input.steer = THREE.MathUtils.clamp(steerVal, -1, 1);
+      if (Math.abs(angleDiff) > 0.85 && bot.speed > 14) input.drift = true;
+
+      // 6. WEAPON FIRING HEURISTICS
       if (bot.currentWeapon) {
-        const dist = bot.group.position.distanceTo(targetPos);
-        if (Math.abs(angleDiff) < 0.35 && dist < 38) bot.fireWeapon();
-        else if (bot.currentWeapon.id === "SPIKE_MINE" && Math.random() < 0.02) bot.fireWeapon();
+        const dist = pos.distanceTo(targetPos);
+        const inFront = Math.abs(angleDiff) < 0.38;
+
+        if (bot.currentWeapon.id === "ROCKET" || bot.currentWeapon.id === "TRIPLE_ROCKET" || bot.currentWeapon.id === "SNOWBALL") {
+          if (inFront && dist < 75) bot.fireWeapon();
+        } else if (bot.currentWeapon.id === "MACHINE_GUN") {
+          if (inFront && dist < 45) bot.fireWeapon();
+        } else if (bot.currentWeapon.id === "NITRO_STAR" || bot.currentWeapon.id === "SPIKY_GO_ROUND") {
+          if (dist < 40) bot.fireWeapon();
+        } else if (bot.currentWeapon.id === "SPIKE_MINE" || bot.currentWeapon.id === "BOUNCING_BOMB") {
+          if (Math.random() < 0.035) bot.fireWeapon();
+        }
       }
 
       bot.updatePhysics(dt, input);
@@ -6992,20 +7983,41 @@
       const nameEl = document.getElementById("weaponName");
       const ammoEl = document.getElementById("weaponAmmo");
       const slotEl = document.getElementById("weaponSlot");
+      const touchAttackEl = document.getElementById("touchAttack") || document.getElementById("touchFire");
 
-      if (player.currentWeapon) {
-        iconEl.textContent = player.currentWeapon.icon;
-        nameEl.textContent = player.currentWeapon.name;
-        slotEl.classList.add("active-weapon");
-        if (player.weaponAmmo > 1) {
-          ammoEl.textContent = player.weaponAmmo;
-          ammoEl.classList.remove("hidden");
-        } else ammoEl.classList.add("hidden");
+      if (player && player.currentWeapon) {
+        if (iconEl) iconEl.textContent = player.currentWeapon.icon;
+        if (nameEl) nameEl.textContent = player.currentWeapon.name;
+        if (slotEl) slotEl.classList.add("active-weapon");
+        if (ammoEl) {
+          if (player.weaponAmmo > 1) {
+            ammoEl.textContent = player.weaponAmmo;
+            ammoEl.classList.remove("hidden");
+          } else {
+            ammoEl.classList.add("hidden");
+          }
+        }
+
+        if (touchAttackEl) {
+          touchAttackEl.classList.add("active-weapon");
+          const tIcon = touchAttackEl.querySelector(".touch-icon");
+          if (tIcon) tIcon.textContent = player.currentWeapon.icon || "⚔️";
+          const tLabel = touchAttackEl.querySelector(".touch-label");
+          if (tLabel) tLabel.textContent = player.weaponAmmo > 1 ? `FIRE (${player.weaponAmmo})` : "FIRE";
+        }
       } else {
-        iconEl.textContent = "❓";
-        nameEl.textContent = "Drive into ? Box";
-        ammoEl.classList.add("hidden");
-        slotEl.classList.remove("active-weapon");
+        if (iconEl) iconEl.textContent = "❓";
+        if (nameEl) nameEl.textContent = "Drive into ? Box";
+        if (ammoEl) ammoEl.classList.add("hidden");
+        if (slotEl) slotEl.classList.remove("active-weapon");
+
+        if (touchAttackEl) {
+          touchAttackEl.classList.remove("active-weapon");
+          const tIcon = touchAttackEl.querySelector(".touch-icon");
+          if (tIcon) tIcon.textContent = "⚔️";
+          const tLabel = touchAttackEl.querySelector(".touch-label");
+          if (tLabel) tLabel.textContent = "ATTACK";
+        }
       }
     }
 
@@ -7038,6 +8050,12 @@
     let matchTimeRemaining = MATCH_DURATION;
 
     function startLocalMatch() {
+      if (typeof isMobileUser === "function" && isMobileUser() && window.innerHeight > window.innerWidth) {
+        pendingGameStart = startLocalMatch;
+        checkAndroidOrientation();
+        requestLandscapeMode();
+        return;
+      }
       sound.init();
       gameState = "playing";
       matchTimeRemaining = MATCH_DURATION;
@@ -7069,10 +8087,16 @@
 
       updateLeaderboardUI();
       updateWeaponSlotUI();
-      updateTouchControlsVisibility();
+      applyDeviceProfile();
     }
 
     function startMatchFromNetwork(serverDuration) {
+      if (typeof isMobileUser === "function" && isMobileUser() && window.innerHeight > window.innerWidth) {
+        pendingGameStart = () => startMatchFromNetwork(serverDuration);
+        checkAndroidOrientation();
+        requestLandscapeMode();
+        return;
+      }
       sound.init();
       gameState = "playing";
       matchTimeRemaining = serverDuration || MATCH_DURATION;
@@ -7080,14 +8104,14 @@
 
       document.querySelectorAll(".overlay").forEach(o => o.classList.add("hidden"));
       document.getElementById("hud").classList.remove("hidden");
-      updateTouchControlsVisibility();
+      applyDeviceProfile();
     }
 
     function endMatch(rankings) {
       gameState = "over";
       document.getElementById("hud").classList.add("hidden");
       document.getElementById("overOverlay").classList.remove("hidden");
-      updateTouchControlsVisibility();
+      applyDeviceProfile();
 
       const sorted = rankings || [...combatants].sort((a, b) => b.smashes - a.smashes || b.score - a.score);
       const playerRank = sorted.findIndex(p => p.name === player.name) + 1;
@@ -7096,6 +8120,45 @@
       document.getElementById("statSmashes").textContent = player.smashes;
       document.getElementById("statDeaths").textContent = player.deaths;
       document.getElementById("statScore").textContent = player.score;
+
+      // Combat Rewards: XP, Coins, Score, Smashes & Level Progression
+      const smashes = player.smashes || 0;
+      const score = player.score || 0;
+      const earnedXP = (smashes * 25) + (playerRank === 1 ? 50 : (playerRank === 2 ? 30 : 15));
+      const earnedCoins = (smashes * 10) + (playerRank === 1 ? 25 : 10);
+
+      config.data.xp = (config.data.xp || 0) + earnedXP;
+      config.data.coins = (config.data.coins || 0) + earnedCoins;
+      config.data.matches_played = (config.data.matches_played || 0) + 1;
+      config.data.smashes = (config.data.smashes || 0) + smashes;
+      config.data.score = (config.data.score || 0) + score;
+
+      // Check level up threshold (100 XP per level)
+      let currentLevel = config.data.level || 1;
+      let xpThreshold = currentLevel * 100;
+      let leveledUp = false;
+      while (config.data.xp >= xpThreshold) {
+        config.data.xp -= xpThreshold;
+        config.data.level = (config.data.level || 1) + 1;
+        config.data.gems = (config.data.gems || 0) + 5; // +5 Gems bonus for each level up
+        currentLevel = config.data.level;
+        xpThreshold = currentLevel * 100;
+        leveledUp = true;
+      }
+
+      config.save();
+      if (typeof updatePlayerProgressionUI === "function") updatePlayerProgressionUI();
+      if (typeof saveProfileToSupabase === "function") saveProfileToSupabase(true);
+
+      if (leveledUp) {
+        setTimeout(() => {
+          showGameToast(`⭐ LEVEL UP! You reached Level ${config.data.level}! +5 Gems 💎`);
+        }, 1100);
+      } else if (earnedXP > 0 || earnedCoins > 0) {
+        setTimeout(() => {
+          showGameToast(`🏆 Match Rewards: +${earnedXP} XP • +${earnedCoins} Coins!`);
+        }, 1100);
+      }
 
       document.getElementById("podiumArea").innerHTML = `
         <div class="podium-step podium-2">
@@ -7160,9 +8223,20 @@
       }
     }
 
+    function triggerPlayerAttack() {
+      if (gameState === "playing" && player) {
+        if (player.currentWeapon) player.fireWeapon();
+        else player.jumpHop();
+      }
+    }
+
     window.addEventListener("keydown", (e) => {
-      if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
+      // Prevent page scrolling on Space and Arrow keys
+      if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code) || e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+      }
       keys[e.code] = true;
+      if (e.code === "Space" || e.key === " ") keys["Space"] = true;
 
       // Escape or P to Pause/Resume
       if (e.code === "Escape" || e.code === "KeyP") {
@@ -7183,13 +8257,17 @@
         return;
       }
 
-      if (e.code === config.data.keybindings.fire && gameState === "playing") {
-        if (player.currentWeapon) player.fireWeapon();
-        else player.jumpHop();
+      // Space Button on Desktop to Attack / Fire Weapon
+      const isAttackKey = (e.code === "Space" || e.key === " " || e.code === config.data.keybindings.fire);
+      if (isAttackKey && gameState === "playing") {
+        triggerPlayerAttack();
       }
     });
 
-    window.addEventListener("keyup", (e) => { keys[e.code] = false; });
+    window.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+      if (e.code === "Space" || e.key === " ") keys["Space"] = false;
+    });
 
     let rebindAction = null;
     function updateKeybindButtonsUI() {
@@ -7210,15 +8288,148 @@
       });
     });
 
+    /* ==========================================================================
+       DEVICE-ADAPTIVE CONTROLS & UI MANAGEMENT (Desktop, Mobile, Tablet)
+       ========================================================================== */
+    function getDetectedHardwareType() {
+      const ua = navigator.userAgent || "";
+      const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+      const isTabletUA = /iPad|Tablet|PlayBook|Silk/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const minDim = Math.min(w, h);
+      const maxDim = Math.max(w, h);
+
+      if (isTabletUA || (isTouch && minDim >= 580 && maxDim >= 880 && maxDim <= 1366)) {
+        return "tablet";
+      }
+      if (isMobileUA || (isTouch && (minDim < 580 || maxDim < 880))) {
+        return "mobile";
+      }
+      if (!isTouch || (w >= 1024 && !isMobileUA && !isTabletUA)) {
+        return "desktop";
+      }
+      return "desktop";
+    }
+
+    function getActiveDeviceProfile() {
+      const userSetting = config.data.deviceProfile || "auto";
+      if (userSetting !== "auto") return userSetting;
+      return getDetectedHardwareType();
+    }
+
+    let activeDeviceProfile = "desktop";
+    let hasGamepadConnected = false;
+
+    function applyDeviceProfile() {
+      const profile = getActiveDeviceProfile();
+      activeDeviceProfile = profile;
+
+      document.documentElement.setAttribute("data-device", profile);
+      document.body.classList.remove("device-desktop", "device-tablet", "device-mobile");
+      document.body.classList.add("device-" + profile);
+
+      // Update HUD elements according to device
+      const actionLabel = document.querySelector(".hud-action-label");
+      const desktopControlBar = document.getElementById("desktopControlBar");
+      const gamepadControlBar = document.getElementById("gamepadControlBar");
+      const tiltIndicator = document.getElementById("tiltSteerIndicator");
+
+      if (profile === "desktop") {
+        if (actionLabel) actionLabel.textContent = "SPACE / ATTACK";
+        if (desktopControlBar) {
+          if (gameState === "playing" && !hasGamepadConnected) desktopControlBar.classList.remove("hidden");
+          else desktopControlBar.classList.add("hidden");
+        }
+        if (gamepadControlBar) {
+          if (gameState === "playing" && hasGamepadConnected) gamepadControlBar.classList.remove("hidden");
+          else gamepadControlBar.classList.add("hidden");
+        }
+        if (tiltIndicator) tiltIndicator.classList.add("hidden");
+      } else if (profile === "mobile") {
+        if (actionLabel) actionLabel.textContent = "TAP TO ATTACK";
+        if (desktopControlBar) desktopControlBar.classList.add("hidden");
+        if (gamepadControlBar) gamepadControlBar.classList.add("hidden");
+        if (tiltIndicator) {
+          if (config.data.gyroSteering === "on" && gameState === "playing") {
+            tiltIndicator.classList.remove("hidden");
+          } else {
+            tiltIndicator.classList.add("hidden");
+          }
+        }
+      } else if (profile === "tablet") {
+        if (actionLabel) actionLabel.textContent = "TAP / SPACE";
+        if (desktopControlBar) desktopControlBar.classList.add("hidden");
+        if (gamepadControlBar) {
+          if (gameState === "playing" && hasGamepadConnected) gamepadControlBar.classList.remove("hidden");
+          else gamepadControlBar.classList.add("hidden");
+        }
+        if (tiltIndicator) {
+          if (config.data.gyroSteering === "on" && gameState === "playing") {
+            tiltIndicator.classList.remove("hidden");
+          } else {
+            tiltIndicator.classList.add("hidden");
+          }
+        }
+      }
+
+      // Update gyro row visibility in settings
+      const gyroRow = document.getElementById("settingGyroRow");
+      if (gyroRow) {
+        gyroRow.style.display = (profile === "desktop") ? "none" : "flex";
+      }
+
+      // Apply Smash Karts touch control customizations
+      const mc = document.getElementById("mobileControls");
+      if (mc) {
+        const scaleVal = (parseInt(config.data.touchSize) || 100) / 100;
+        const opacityVal = (parseInt(config.data.touchOpacity) || 75) / 100;
+        mc.style.setProperty("--touch-scale", scaleVal);
+        mc.style.setProperty("--touch-opacity", opacityVal);
+
+        const steerMode = config.data.mobileSteerMode || "buttons";
+        const btnGroup = document.getElementById("steerButtonsGroup");
+        const joyGroup = document.getElementById("virtualJoystickGroup");
+        if (btnGroup && joyGroup) {
+          if (steerMode === "joystick") {
+            btnGroup.classList.add("hidden");
+            joyGroup.classList.remove("hidden");
+          } else {
+            btnGroup.classList.remove("hidden");
+            joyGroup.classList.add("hidden");
+          }
+        }
+      }
+
+      const mobileRows = ["settingMobileSteerRow", "settingAutoDriveRow", "settingTouchSizeRow", "settingTouchOpacityRow"];
+      mobileRows.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (profile === "desktop") ? "none" : "flex";
+      });
+
+      updateTouchControlsVisibility();
+    }
+
     function updateTouchControlsVisibility() {
       const mc = document.getElementById("mobileControls");
       if (!mc) return;
+
+      const profile = getActiveDeviceProfile();
       const setting = config.data.touchControls || "auto";
-      const isTouchDevice = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-      const isSmallScreen = window.innerWidth <= 820 || (window.innerHeight <= 520 && window.innerWidth <= 1024);
-      const shouldShow = (gameState === "playing") && (
-        setting === "on" || (setting === "auto" && (isTouchDevice || isSmallScreen))
-      );
+
+      let shouldShow = false;
+      if (gameState === "playing") {
+        if (setting === "on") {
+          shouldShow = true;
+        } else if (setting === "off") {
+          shouldShow = false;
+        } else {
+          // Auto
+          shouldShow = (profile === "mobile" || profile === "tablet");
+        }
+      }
 
       if (shouldShow) {
         mc.classList.remove("hidden");
@@ -7229,49 +8440,365 @@
       }
     }
 
-    function setupTouchBtn(el, onDown, onUp) {
-      if (!el) return;
-      let isDown = false;
-      const handleDown = (e) => {
-        if (e.cancelable) e.preventDefault();
-        if (!isDown) {
-          isDown = true;
-          el.classList.add("active");
-          if (onDown) onDown(e);
-        }
-      };
-      const handleUp = (e) => {
-        if (e.cancelable) e.preventDefault();
-        if (isDown) {
-          isDown = false;
-          el.classList.remove("active");
-          if (onUp) onUp(e);
-        }
-      };
+    /* Gamepad API Controller Polling */
+    function pollGamepadInput() {
+      if (!navigator.getGamepads) return null;
+      const gamepads = navigator.getGamepads();
+      for (let i = 0; i < gamepads.length; i++) {
+        const gp = gamepads[i];
+        if (gp && gp.connected) {
+          if (!hasGamepadConnected) {
+            hasGamepadConnected = true;
+            applyDeviceProfile();
+          }
 
-      el.addEventListener("touchstart", handleDown, { passive: false });
-      el.addEventListener("touchend", handleUp, { passive: false });
-      el.addEventListener("touchcancel", handleUp, { passive: false });
+          const steerStick = Math.abs(gp.axes[0]) > 0.15 ? gp.axes[0] : 0;
+          const dpadL = (gp.buttons[14] && gp.buttons[14].pressed) ? -1 : 0;
+          const dpadR = (gp.buttons[15] && gp.buttons[15].pressed) ? 1 : 0;
+          const steer = steerStick || (dpadL + dpadR);
 
-      el.addEventListener("pointerdown", handleDown);
-      el.addEventListener("pointerup", handleUp);
-      el.addEventListener("pointercancel", handleUp);
-      el.addEventListener("pointerleave", (e) => {
-        if (isDown && e.pointerType === "mouse") handleUp(e);
-      });
+          const rtVal = gp.buttons[7] ? gp.buttons[7].value : 0;
+          const ltVal = gp.buttons[6] ? gp.buttons[6].value : 0;
+          const aPressed = (gp.buttons[0] && gp.buttons[0].pressed) ? 1 : 0;
+          const bPressed = (gp.buttons[1] && gp.buttons[1].pressed) ? 1 : 0;
+
+          const throttle = (rtVal > 0.1 ? rtVal : aPressed) - (ltVal > 0.1 ? ltVal : bPressed);
+          const drift = !!((gp.buttons[5] && gp.buttons[5].pressed) || (gp.buttons[4] && gp.buttons[4].pressed) || (gp.buttons[3] && gp.buttons[3].pressed));
+          const fire = !!((gp.buttons[2] && gp.buttons[2].pressed) || (gp.buttons[0] && gp.buttons[0].pressed && rtVal > 0.1));
+
+          return { steer, throttle, drift, fire, connected: true };
+        }
+      }
+
+      if (hasGamepadConnected) {
+        hasGamepadConnected = false;
+        applyDeviceProfile();
+      }
+      return null;
     }
 
-    setupTouchBtn(document.getElementById("touchLeft"), () => { keys["KeyA"] = true; }, () => { keys["KeyA"] = false; });
-    setupTouchBtn(document.getElementById("touchRight"), () => { keys["KeyD"] = true; }, () => { keys["KeyD"] = false; });
-    setupTouchBtn(document.getElementById("touchGas"), () => { keys["KeyW"] = true; }, () => { keys["KeyW"] = false; });
-    setupTouchBtn(document.getElementById("touchBrake"), () => { keys["KeyS"] = true; }, () => { keys["KeyS"] = false; });
-    setupTouchBtn(document.getElementById("touchDrift"), () => { keys["ShiftLeft"] = true; }, () => { keys["ShiftLeft"] = false; });
-    setupTouchBtn(document.getElementById("touchFire"), () => {
-      if (gameState === "playing") {
-        if (player.currentWeapon) player.fireWeapon();
-        else player.jumpHop();
+    window.addEventListener("gamepadconnected", () => {
+      hasGamepadConnected = true;
+      applyDeviceProfile();
+    });
+
+    window.addEventListener("gamepaddisconnected", () => {
+      hasGamepadConnected = false;
+      applyDeviceProfile();
+    });
+
+    /* Gyroscope / Tilt Steering System */
+    let gyroSteer = 0;
+
+    function setupDeviceOrientationSystem() {
+      if (!window.DeviceOrientationEvent) return;
+
+      const handleOrientation = (e) => {
+        if (config.data.gyroSteering !== "on") {
+          gyroSteer = 0;
+          return;
+        }
+
+        const angle = (screen.orientation && screen.orientation.angle !== undefined)
+          ? screen.orientation.angle
+          : (window.orientation !== undefined ? window.orientation : 90);
+
+        let tilt = 0;
+        if (angle === 90) {
+          tilt = -(e.beta || 0);
+        } else if (angle === -90 || angle === 270) {
+          tilt = (e.beta || 0);
+        } else {
+          tilt = (e.gamma || 0);
+        }
+
+        if (Math.abs(tilt) < 2.5) {
+          gyroSteer = 0;
+        } else {
+          gyroSteer = THREE.MathUtils.clamp((tilt > 0 ? tilt - 2.5 : tilt + 2.5) / 20, -1, 1);
+        }
+      };
+
+      window.addEventListener("deviceorientation", handleOrientation);
+    }
+    setupDeviceOrientationSystem();
+
+    let joystickSteerVal = 0;
+
+    function setupTouchControlsSystem() {
+      function bindSimpleTouch(el, onDown, onUp) {
+        if (!el) return;
+        let isDown = false;
+        const downHandler = (e) => {
+          if (e && e.cancelable) e.preventDefault();
+          if (!isDown) {
+            isDown = true;
+            el.classList.add("active");
+            if (onDown) onDown(e);
+          }
+        };
+        const upHandler = (e) => {
+          if (e && e.cancelable) e.preventDefault();
+          if (isDown) {
+            isDown = false;
+            el.classList.remove("active");
+            if (onUp) onUp(e);
+          }
+        };
+
+        el.addEventListener("touchstart", downHandler, { passive: false });
+        el.addEventListener("touchend", upHandler, { passive: false });
+        el.addEventListener("touchcancel", upHandler, { passive: false });
+        el.addEventListener("pointerdown", downHandler);
+        el.addEventListener("pointerup", upHandler);
+        el.addEventListener("pointercancel", upHandler);
+        el.addEventListener("pointerleave", (e) => {
+          if (isDown && e.pointerType === "mouse") upHandler(e);
+        });
       }
-    }, () => {});
+
+      // Drift Turbo Button
+      const driftBtn = document.getElementById("touchDrift");
+      bindSimpleTouch(driftBtn, () => {
+        keys["ShiftLeft"] = true;
+        if (navigator.vibrate) navigator.vibrate(15);
+      }, () => {
+        keys["ShiftLeft"] = false;
+      });
+
+      // Attack / Fire Weapon Button
+      const attackBtn = document.getElementById("touchAttack") || document.getElementById("touchFire");
+      bindSimpleTouch(attackBtn, () => {
+        triggerPlayerAttack();
+        if (navigator.vibrate) navigator.vibrate(25);
+      }, () => {});
+
+      // Sliding Left & Right Steer Cluster
+      const steerRow = document.querySelector(".touch-steer-row");
+      const leftBtn = document.getElementById("touchLeft");
+      const rightBtn = document.getElementById("touchRight");
+      let activeSteerTouchId = null;
+
+      function updateSteerCoords(clientX, clientY) {
+        if (!leftBtn || !rightBtn) return;
+        const leftRect = leftBtn.getBoundingClientRect();
+        const rightRect = rightBtn.getBoundingClientRect();
+
+        const hitPad = 14;
+        const inLeft = (clientX >= leftRect.left - hitPad && clientX <= leftRect.right + 4 &&
+                        clientY >= leftRect.top - hitPad && clientY <= leftRect.bottom + hitPad);
+        const inRight = (clientX >= rightRect.left - 4 && clientX <= rightRect.right + hitPad &&
+                         clientY >= rightRect.top - hitPad && clientY <= rightRect.bottom + hitPad);
+
+        if (inLeft) {
+          keys["KeyD"] = false;
+          rightBtn.classList.remove("active");
+          if (!keys["KeyA"]) {
+            keys["KeyA"] = true;
+            leftBtn.classList.add("active");
+            if (navigator.vibrate) navigator.vibrate(10);
+          }
+        } else if (inRight) {
+          keys["KeyA"] = false;
+          leftBtn.classList.remove("active");
+          if (!keys["KeyD"]) {
+            keys["KeyD"] = true;
+            rightBtn.classList.add("active");
+            if (navigator.vibrate) navigator.vibrate(10);
+          }
+        } else {
+          keys["KeyA"] = false;
+          keys["KeyD"] = false;
+          leftBtn.classList.remove("active");
+          rightBtn.classList.remove("active");
+        }
+      }
+
+      if (steerRow) {
+        steerRow.addEventListener("touchstart", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            activeSteerTouchId = t.identifier;
+            updateSteerCoords(t.clientX, t.clientY);
+          }
+        }, { passive: false });
+
+        steerRow.addEventListener("touchmove", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.touches.length; i++) {
+            const t = e.touches[i];
+            if (t.identifier === activeSteerTouchId) {
+              updateSteerCoords(t.clientX, t.clientY);
+            }
+          }
+        }, { passive: false });
+
+        const releaseSteer = (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activeSteerTouchId) {
+              activeSteerTouchId = null;
+              keys["KeyA"] = false;
+              keys["KeyD"] = false;
+              leftBtn?.classList.remove("active");
+              rightBtn?.classList.remove("active");
+            }
+          }
+        };
+
+        steerRow.addEventListener("touchend", releaseSteer, { passive: false });
+        steerRow.addEventListener("touchcancel", releaseSteer, { passive: false });
+      }
+
+      // Pointer/mouse clicks on Left/Right for testing
+      bindSimpleTouch(leftBtn, () => { keys["KeyA"] = true; }, () => { keys["KeyA"] = false; });
+      bindSimpleTouch(rightBtn, () => { keys["KeyD"] = true; }, () => { keys["KeyD"] = false; });
+
+      // Smash Karts Virtual Analog Joystick
+      const joyWrap = document.getElementById("virtualJoystickGroup");
+      const joyStick = document.getElementById("joystickStick");
+      let activeJoyTouchId = null;
+
+      if (joyWrap && joyStick) {
+        const resetJoystick = () => {
+          activeJoyTouchId = null;
+          joystickSteerVal = 0;
+          joyStick.style.transform = `translate(0px, 0px)`;
+        };
+
+        const handleJoyMove = (clientX, clientY) => {
+          const rect = joyWrap.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const maxRadius = rect.width / 2 - 8;
+
+          const dx = clientX - centerX;
+          const dy = clientY - centerY;
+          const dist = Math.hypot(dx, dy);
+          const clampedDist = Math.min(dist, maxRadius);
+          const angle = Math.atan2(dy, dx);
+
+          const stickX = Math.cos(angle) * clampedDist;
+          const stickY = Math.sin(angle) * clampedDist;
+
+          joyStick.style.transform = `translate(${stickX}px, ${stickY}px)`;
+          joystickSteerVal = THREE.MathUtils.clamp(stickX / maxRadius, -1, 1);
+        };
+
+        joyWrap.addEventListener("touchstart", (e) => {
+          if (e.cancelable) e.preventDefault();
+          if (activeJoyTouchId === null && e.changedTouches.length > 0) {
+            activeJoyTouchId = e.changedTouches[0].identifier;
+            handleJoyMove(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+          }
+        }, { passive: false });
+
+        joyWrap.addEventListener("touchmove", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === activeJoyTouchId) {
+              handleJoyMove(e.touches[i].clientX, e.touches[i].clientY);
+            }
+          }
+        }, { passive: false });
+
+        joyWrap.addEventListener("touchend", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activeJoyTouchId) {
+              resetJoystick();
+            }
+          }
+        }, { passive: false });
+
+        joyWrap.addEventListener("touchcancel", resetJoystick, { passive: false });
+      }
+
+      // Sliding Gas & Brake Pedals Cluster
+      const pedalsRow = document.querySelector(".touch-action-row") || document.querySelector(".touch-pedals-row");
+      const gasBtn = document.getElementById("touchGas");
+      const brakeBtn = document.getElementById("touchBrake");
+      let activePedalTouchId = null;
+
+      function updatePedalCoords(clientX, clientY) {
+        if (!gasBtn || !brakeBtn) return;
+        const gasRect = gasBtn.getBoundingClientRect();
+        const brakeRect = brakeBtn.getBoundingClientRect();
+
+        const hitPad = 14;
+        const inGas = (clientX >= gasRect.left - 4 && clientX <= gasRect.right + hitPad &&
+                       clientY >= gasRect.top - hitPad && clientY <= gasRect.bottom + hitPad);
+        const inBrake = (clientX >= brakeRect.left - hitPad && clientX <= brakeRect.right + 4 &&
+                         clientY >= brakeRect.top - hitPad && clientY <= brakeRect.bottom + hitPad);
+
+        if (inGas) {
+          keys["KeyS"] = false;
+          brakeBtn.classList.remove("active");
+          if (!keys["KeyW"]) {
+            keys["KeyW"] = true;
+            gasBtn.classList.add("active");
+            if (navigator.vibrate) navigator.vibrate(10);
+          }
+        } else if (inBrake) {
+          keys["KeyW"] = false;
+          gasBtn.classList.remove("active");
+          if (!keys["KeyS"]) {
+            keys["KeyS"] = true;
+            brakeBtn.classList.add("active");
+            if (navigator.vibrate) navigator.vibrate(10);
+          }
+        } else {
+          keys["KeyW"] = false;
+          keys["KeyS"] = false;
+          gasBtn.classList.remove("active");
+          brakeBtn.classList.remove("active");
+        }
+      }
+
+      if (pedalsRow) {
+        pedalsRow.addEventListener("touchstart", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            const t = e.changedTouches[i];
+            activePedalTouchId = t.identifier;
+            updatePedalCoords(t.clientX, t.clientY);
+          }
+        }, { passive: false });
+
+        pedalsRow.addEventListener("touchmove", (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.touches.length; i++) {
+            const t = e.touches[i];
+            if (t.identifier === activePedalTouchId) {
+              updatePedalCoords(t.clientX, t.clientY);
+            }
+          }
+        }, { passive: false });
+
+        const releasePedal = (e) => {
+          if (e.cancelable) e.preventDefault();
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === activePedalTouchId) {
+              activePedalTouchId = null;
+              keys["KeyW"] = false;
+              keys["KeyS"] = false;
+              gasBtn?.classList.remove("active");
+              brakeBtn?.classList.remove("active");
+            }
+          }
+        };
+
+        pedalsRow.addEventListener("touchend", releasePedal, { passive: false });
+        pedalsRow.addEventListener("touchcancel", releasePedal, { passive: false });
+      }
+
+      // Pointer/mouse clicks on Gas/Brake for testing
+      bindSimpleTouch(gasBtn, () => { keys["KeyW"] = true; }, () => { keys["KeyW"] = false; });
+      bindSimpleTouch(brakeBtn, () => { keys["KeyS"] = true; }, () => { keys["KeyS"] = false; });
+    }
+
+    setupTouchControlsSystem();
 
     /* ==========================================================================
        MODAL NAVIGATION & CUSTOMIZATION WIDGETS
@@ -7325,21 +8852,260 @@
       el.classList.add("balance-bump");
     }
 
+    // =========================================================================
+    // PLAYER PROGRESSION & SUPABASE CLOUD SAVE ENGINE
+    // =========================================================================
+    let syncSupabaseTimer = null;
+
+    function updatePlayerProgressionUI() {
+      // 1. Balances
+      const coins = Number(config.data.coins ?? 100);
+      const gems = Number(config.data.gems ?? 25);
+      const level = Number(config.data.level ?? 1);
+      const xp = Number(config.data.xp ?? 0);
+      const xpNeeded = Math.max(100, level * 100);
+      const progressPct = Math.min(100, Math.max(0, Math.floor((xp / xpNeeded) * 100)));
+
+      if (coinAmountEl) coinAmountEl.textContent = coins;
+      if (gemAmountEl) gemAmountEl.textContent = gems;
+
+      // 2. Level Badge & Progress Bar
+      const levelNumEl = document.querySelector(".turbo-level-num");
+      const levelBarEl = document.querySelector(".turbo-level-bar-fill");
+      const levelTextEl = document.querySelector(".turbo-level-text");
+
+      if (levelNumEl) levelNumEl.textContent = level;
+      if (levelBarEl) levelBarEl.style.width = `${progressPct}%`;
+      if (levelTextEl) levelTextEl.textContent = `${xp} / ${xpNeeded}`;
+
+      // 3. Username Display
+      const usernameInputEl = document.getElementById("usernameInput");
+      if (usernameInputEl && document.activeElement !== usernameInputEl) {
+        usernameInputEl.value = config.data.username || "TurnpikeTorqu";
+      }
+
+      // 4. Modal Profile Elements
+      const loggedInLevel = document.getElementById("loggedInLevelText");
+      const loggedInCoins = document.getElementById("loggedInCoinsText");
+      const loggedInGems = document.getElementById("loggedInGemsText");
+      const loggedInCombat = document.getElementById("loggedInCombatRecord");
+      const loggedInUser = document.getElementById("loggedInUsername");
+      const loggedInMail = document.getElementById("loggedInEmail");
+
+      if (loggedInLevel) loggedInLevel.textContent = `Level ${level} (${xp} / ${xpNeeded} XP)`;
+      if (loggedInCoins) loggedInCoins.textContent = `${coins.toLocaleString()} 🪙`;
+      if (loggedInGems) loggedInGems.textContent = `${gems.toLocaleString()} 💎`;
+      if (loggedInCombat) {
+        const smashes = Number(config.data.smashes ?? 0);
+        const matches = Number(config.data.matches_played ?? 0);
+        const score = Number(config.data.score ?? 0);
+        loggedInCombat.textContent = `${smashes} Smashes • ${matches} Matches • ${score} Pts`;
+      }
+      if (currentRacerUser) {
+        if (loggedInUser) loggedInUser.textContent = config.data.username || "Racer";
+        if (loggedInMail) loggedInMail.textContent = currentRacerUser.email || "";
+      }
+    }
+
+    function updateGarageSelectionUI() {
+      // Chassis chips
+      document.querySelectorAll("#chassisSelector .chip-btn").forEach(c => {
+        c.classList.toggle("active", c.getAttribute("data-chassis") === config.data.chassis);
+      });
+      // Hat chips
+      document.querySelectorAll("#hatSelector .chip-btn").forEach(c => {
+        c.classList.toggle("active", c.getAttribute("data-hat") === config.data.hat);
+      });
+      // Wheels chips
+      document.querySelectorAll("#wheelSelector .chip-btn").forEach(c => {
+        c.classList.toggle("active", c.getAttribute("data-wheels") === config.data.wheels);
+      });
+      // Trail chips
+      document.querySelectorAll("#trailSelector .chip-btn").forEach(c => {
+        c.classList.toggle("active", c.getAttribute("data-trail") === config.data.trail);
+      });
+      // Color swatches
+      const curHex = "#" + (config.data.color || 0x10b981).toString(16).padStart(6, "0").toLowerCase();
+      document.querySelectorAll(".color-swatch").forEach(s => {
+        const swColor = (s.getAttribute("data-color") || "").toLowerCase();
+        s.classList.toggle("active", swColor === curHex);
+      });
+      // Re-render hero kart model in showcase if available
+      if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
+        scene.remove(player.group);
+        player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+        player.group = player.meshData.group;
+        scene.add(player.group);
+      }
+    }
+
+    async function saveProfileToSupabase(immediate = false) {
+      if (!currentRacerUser) return;
+
+      const performSync = async () => {
+        try {
+          const hexColor = "#" + (config.data.color || 0x10b981).toString(16).padStart(6, "0");
+          const updatePayload = {
+            username: config.data.username || "Racer",
+            coins: Number(config.data.coins ?? 100),
+            gems: Number(config.data.gems ?? 25),
+            level: Number(config.data.level ?? 1),
+            xp: Number(config.data.xp ?? 0),
+            matches_played: Number(config.data.matches_played ?? 0),
+            smashes: Number(config.data.smashes ?? 0),
+            score: Number(config.data.score ?? 0),
+            chassis: config.data.chassis || "standard",
+            wheels: config.data.wheels || "slicks",
+            hat: config.data.hat || "crown",
+            trail: config.data.trail || "flame",
+            kart_color: hexColor,
+            device_type: getDeviceType(),
+            updated_at: new Date().toISOString()
+          };
+
+          const { error } = await supabase
+            .from("profiles")
+            .update(updatePayload)
+            .eq("id", currentRacerUser.id);
+
+          if (error) {
+            console.warn("Supabase profile sync error:", error.message);
+          } else {
+            // Also notify local analytics cache for real-time admin sync
+            fetch("/api/auth/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...updatePayload,
+                email: currentRacerUser.email
+              })
+            }).catch(() => {});
+          }
+        } catch (e) {
+          console.warn("Supabase profile sync exception:", e);
+        }
+      };
+
+      if (immediate) {
+        if (syncSupabaseTimer) clearTimeout(syncSupabaseTimer);
+        await performSync();
+      } else {
+        if (syncSupabaseTimer) clearTimeout(syncSupabaseTimer);
+        syncSupabaseTimer = setTimeout(performSync, 800);
+      }
+    }
+
+    async function loadUserProfile(user) {
+      if (!user) return null;
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Error fetching Supabase profile:", error.message);
+          return null;
+        }
+
+        if (profile) {
+          if (profile.username) config.data.username = profile.username;
+          if (profile.coins !== null && profile.coins !== undefined) config.data.coins = Number(profile.coins);
+          if (profile.gems !== null && profile.gems !== undefined) config.data.gems = Number(profile.gems);
+          if (profile.level !== null && profile.level !== undefined) config.data.level = Number(profile.level);
+          if (profile.xp !== null && profile.xp !== undefined) config.data.xp = Number(profile.xp);
+          if (profile.matches_played !== null && profile.matches_played !== undefined) config.data.matches_played = Number(profile.matches_played);
+          if (profile.smashes !== null && profile.smashes !== undefined) config.data.smashes = Number(profile.smashes);
+          if (profile.score !== null && profile.score !== undefined) config.data.score = Number(profile.score);
+          if (profile.chassis) config.data.chassis = profile.chassis;
+          if (profile.wheels) config.data.wheels = profile.wheels;
+          if (profile.hat) config.data.hat = profile.hat;
+          if (profile.trail) config.data.trail = profile.trail;
+          if (profile.kart_color) {
+            const hex = profile.kart_color.replace("#", "0x");
+            config.data.color = parseInt(hex, 16) || config.data.color;
+          }
+
+          config.save();
+          updatePlayerProgressionUI();
+          updateGarageSelectionUI();
+          return profile;
+        } else {
+          // If profile row doesn't exist yet, insert it
+          const hexColor = "#" + (config.data.color || 0x10b981).toString(16).padStart(6, "0");
+          await supabase.from("profiles").insert({
+            id: user.id,
+            username: config.data.username || "Racer",
+            coins: config.data.coins || 100,
+            gems: config.data.gems || 25,
+            level: config.data.level || 1,
+            xp: config.data.xp || 0,
+            device_type: getDeviceType(),
+            chassis: config.data.chassis || "standard",
+            wheels: config.data.wheels || "slicks",
+            hat: config.data.hat || "crown",
+            trail: config.data.trail || "flame",
+            kart_color: hexColor
+          });
+        }
+      } catch (e) {
+        console.warn("Failed loading user profile:", e);
+      }
+      return null;
+    }
+
+    function renderAuthUIState(isLoggedIn, user) {
+      const loggedInView = document.getElementById("authLoggedInView");
+      const loggedOutView = document.getElementById("authLoggedOutView");
+      const headerTitle = document.getElementById("authModalHeaderTitle");
+      const signInBtnEl = document.getElementById("signInBtn");
+
+      if (isLoggedIn && user) {
+        if (loggedInView) loggedInView.classList.remove("hidden");
+        if (loggedOutView) loggedOutView.classList.add("hidden");
+        if (headerTitle) headerTitle.textContent = `🏎️ Cloud Racer Account`;
+
+        // Update home screen button to show username and synced indicator
+        if (signInBtnEl) {
+          const title = signInBtnEl.querySelector(".turbo-signin-title");
+          const sub = signInBtnEl.querySelector(".turbo-signin-sub");
+          if (title) title.textContent = config.data.username || "Racer";
+          if (sub) {
+            sub.innerHTML = `<span style="color:#10b981;font-weight:700;">🟢 Cloud Synced</span>`;
+          }
+        }
+      } else {
+        if (loggedInView) loggedInView.classList.add("hidden");
+        if (loggedOutView) loggedOutView.classList.remove("hidden");
+        if (headerTitle) headerTitle.textContent = `🏎️ Racer Cloud Account`;
+
+        // Update home screen button
+        if (signInBtnEl) {
+          const title = signInBtnEl.querySelector(".turbo-signin-title");
+          const sub = signInBtnEl.querySelector(".turbo-signin-sub");
+          if (title) title.textContent = "Sign In / Up";
+          if (sub) sub.textContent = "Save progress & rewards";
+        }
+      }
+      updatePlayerProgressionUI();
+    }
+
+    // Currency button listeners with automatic Supabase sync
     const addCoinsBtn = document.getElementById("addCoinsBtn");
     if (addCoinsBtn) {
       addCoinsBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         config.data.coins = (config.data.coins || 0) + 100;
         config.save();
-        if (coinAmountEl) {
-          coinAmountEl.textContent = config.data.coins;
-          bumpBalance(coinAmountEl);
-        }
+        updatePlayerProgressionUI();
+        if (coinAmountEl) bumpBalance(coinAmountEl);
         try {
           sound.init();
           sound.playPowerup();
         } catch (err) {}
         showGameToast("💰 +100 Coins Added!");
+        saveProfileToSupabase();
       });
     }
 
@@ -7358,15 +9124,14 @@
         e.stopPropagation();
         config.data.gems = (config.data.gems || 0) + 25;
         config.save();
-        if (gemAmountEl) {
-          gemAmountEl.textContent = config.data.gems;
-          bumpBalance(gemAmountEl);
-        }
+        updatePlayerProgressionUI();
+        if (gemAmountEl) bumpBalance(gemAmountEl);
         try {
           sound.init();
           sound.playPowerup();
         } catch (err) {}
         showGameToast("💎 +25 Gems Added!");
+        saveProfileToSupabase();
       });
     }
 
@@ -7404,13 +9169,263 @@
       });
     }
 
+    // =========================================================================
+    // CLIENT ANALYTICS BEACON SYSTEM (Pure real-time device telemetry)
+    // =========================================================================
+    function getDeviceType() {
+      const ua = navigator.userAgent;
+      if (/Android/i.test(ua)) return "Android";
+      if (/iPad|iPhone|iPod/i.test(ua) || /CrOS/i.test(ua) || /PlayStation|Nintendo|Xbox|SmartTV/i.test(ua)) return "Other";
+      if (/Windows NT|Macintosh|Mac OS X|Linux/i.test(ua)) return "Desktop";
+      return "Desktop";
+    }
+
+    function initAnalyticsBeacon() {
+      const devType = getDeviceType();
+      const screenRes = `${window.screen.width}x${window.screen.height}`;
+      const referrer = document.referrer || "";
+      let sid = sessionStorage.getItem("turbo_analytics_sid");
+      if (!sid) {
+        sid = "sid_" + Math.random().toString(36).substring(2, 9);
+        sessionStorage.setItem("turbo_analytics_sid", sid);
+      }
+
+      function sendBeacon() {
+        try {
+          fetch("/api/analytics/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sessionId: sid,
+              page: window.location.pathname || "/",
+              referrer,
+              screen: screenRes,
+              deviceOverride: devType,
+              inputType: ("ontouchstart" in window) ? "touch" : "keyboard_mouse"
+            })
+          }).catch(() => {});
+        } catch (e) {}
+      }
+
+      sendBeacon();
+      setInterval(sendBeacon, 25000);
+    }
+    initAnalyticsBeacon();
+
+    // =========================================================================
+    // SUPABASE AUTH UI MODAL & CONTROLS
+    // =========================================================================
     const signInBtn = document.getElementById("signInBtn");
-    if (signInBtn) {
+    const authOverlay = document.getElementById("authOverlay");
+    const closeAuthModalBtn = document.getElementById("closeAuthModalBtn");
+    const tabSignInBtn = document.getElementById("tabSignInBtn");
+    const tabSignUpBtn = document.getElementById("tabSignUpBtn");
+    const signInForm = document.getElementById("signInForm");
+    const signUpForm = document.getElementById("signUpForm");
+    const authStatusMsg = document.getElementById("authStatusMsg");
+    const authSignOutBtn = document.getElementById("authSignOutBtn");
+
+    if (signInBtn && authOverlay) {
       signInBtn.addEventListener("click", () => {
         sound.playPowerup();
-        showGameToast("✅ Signed In as " + config.data.username + "!");
+        authStatusMsg.style.display = "none";
+        authOverlay.classList.remove("hidden");
       });
     }
+
+    if (closeAuthModalBtn && authOverlay) {
+      closeAuthModalBtn.addEventListener("click", () => authOverlay.classList.add("hidden"));
+    }
+
+    // Modal Tabs Switcher
+    if (tabSignInBtn && tabSignUpBtn) {
+      tabSignInBtn.addEventListener("click", () => {
+        tabSignInBtn.style.background = "var(--primary)";
+        tabSignInBtn.style.color = "#000";
+        tabSignUpBtn.style.background = "transparent";
+        tabSignUpBtn.style.color = "#94a3b8";
+        signInForm.classList.remove("hidden");
+        signUpForm.classList.add("hidden");
+        authStatusMsg.style.display = "none";
+      });
+
+      tabSignUpBtn.addEventListener("click", () => {
+        tabSignUpBtn.style.background = "var(--primary)";
+        tabSignUpBtn.style.color = "#000";
+        tabSignInBtn.style.background = "transparent";
+        tabSignInBtn.style.color = "#94a3b8";
+        signUpForm.classList.remove("hidden");
+        signInForm.classList.add("hidden");
+        authStatusMsg.style.display = "none";
+      });
+    }
+
+    // Sign In Form Handler
+    if (signInForm) {
+      signInForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("loginEmailInput").value.trim();
+        const password = document.getElementById("loginPasswordInput").value;
+        const submitBtn = document.getElementById("submitLoginBtn");
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳</span> Connecting to Supabase...`;
+        authStatusMsg.style.display = "block";
+        authStatusMsg.style.color = "#38bdf8";
+        authStatusMsg.textContent = "Verifying credentials...";
+
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>🔑</span> Sign In & Load Progress`;
+
+          if (error) {
+            authStatusMsg.style.color = "#ef4444";
+            authStatusMsg.textContent = `✕ ${error.message}`;
+            return;
+          }
+
+          currentRacerUser = data.user;
+          await loadUserProfile(data.user);
+          renderAuthUIState(true, data.user);
+          authStatusMsg.style.display = "none";
+          sound.playPowerup();
+          showGameToast(`✅ Welcome back, ${config.data.username}! Cloud data loaded.`);
+          authOverlay.classList.add("hidden");
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>🔑</span> Sign In & Load Progress`;
+          authStatusMsg.style.color = "#ef4444";
+          authStatusMsg.textContent = `✕ Network error: ${err.message}`;
+        }
+      });
+    }
+
+    // Sign Up Form Handler
+    if (signUpForm) {
+      signUpForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("signupUsernameInput").value.trim();
+        const email = document.getElementById("signupEmailInput").value.trim();
+        const password = document.getElementById("signupPasswordInput").value;
+        const submitBtn = document.getElementById("submitSignupBtn");
+
+        if (username.length < 2) {
+          authStatusMsg.style.display = "block";
+          authStatusMsg.style.color = "#ef4444";
+          authStatusMsg.textContent = "✕ Racer nickname must be at least 2 characters.";
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>⏳</span> Creating Racer Profile...`;
+        authStatusMsg.style.display = "block";
+        authStatusMsg.style.color = "#38bdf8";
+        authStatusMsg.textContent = "Provisioning cloud profile...";
+
+        try {
+          const hexColor = "#" + (config.data.color || 0x10b981).toString(16).padStart(6, "0");
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                username,
+                device_type: getDeviceType(),
+                coins: config.data.coins || 100,
+                gems: config.data.gems || 25,
+                level: config.data.level || 1,
+                xp: config.data.xp || 0,
+                chassis: config.data.chassis || "standard",
+                wheels: config.data.wheels || "slicks",
+                hat: config.data.hat || "crown",
+                trail: config.data.trail || "flame",
+                kart_color: hexColor
+              }
+            }
+          });
+
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>🚀</span> Create Account &amp; Save Progress`;
+
+          if (error) {
+            authStatusMsg.style.color = "#ef4444";
+            authStatusMsg.textContent = `✕ ${error.message}`;
+            return;
+          }
+
+          currentRacerUser = data.user;
+          config.data.username = username;
+          config.save();
+          await loadUserProfile(data.user);
+          renderAuthUIState(true, data.user);
+          authStatusMsg.style.display = "none";
+          sound.playPowerup();
+          showGameToast(`🎉 Account Created! 100 Coins & 25 Gems awarded!`);
+          authOverlay.classList.add("hidden");
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<span>🚀</span> Create Account &amp; Save Progress`;
+          authStatusMsg.style.color = "#ef4444";
+          authStatusMsg.textContent = `✕ Network error: ${err.message}`;
+        }
+      });
+    }
+
+    // Sign Out Handler
+    if (authSignOutBtn) {
+      authSignOutBtn.addEventListener("click", async () => {
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {}
+        currentRacerUser = null;
+        renderAuthUIState(false, null);
+        showGameToast("🚪 Signed out from cloud account");
+        authOverlay.classList.add("hidden");
+      });
+    }
+
+    // Listen to Supabase Auth State Changes
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session && session.user) {
+        currentRacerUser = session.user;
+        await loadUserProfile(session.user);
+        renderAuthUIState(true, session.user);
+      } else {
+        currentRacerUser = null;
+        renderAuthUIState(false, null);
+      }
+    });
+
+    // Check existing active Supabase session on page load
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session && session.user) {
+        currentRacerUser = session.user;
+        await loadUserProfile(session.user);
+        renderAuthUIState(true, session.user);
+      } else {
+        currentRacerUser = null;
+        renderAuthUIState(false, null);
+      }
+    });
+
+    // Sync username input changes to Supabase if logged in
+    const usernameInputElem = document.getElementById("usernameInput");
+    if (usernameInputElem) {
+      usernameInputElem.addEventListener("change", () => {
+        const val = usernameInputElem.value.trim();
+        if (val && val !== config.data.username) {
+          config.data.username = val;
+          config.save();
+          updatePlayerProgressionUI();
+          saveProfileToSupabase();
+        }
+      });
+    }
+
+    // Initial hydration of UI balances and level badges
+    updatePlayerProgressionUI();
+
 
     // Interactive Drag-to-Rotate Hero Kart in 3D Showcase (Mobbin game pattern)
     let isDraggingMenuKart = false;
@@ -7550,6 +9565,13 @@
           chip.classList.add("active");
           config.data[configKey] = chip.getAttribute(`data-${configKey.replace("Selector", "")}`);
           config.save();
+          if (typeof saveProfileToSupabase === "function") saveProfileToSupabase();
+          if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
+            scene.remove(player.group);
+            player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+            player.group = player.meshData.group;
+            scene.add(player.group);
+          }
         });
       });
     }
@@ -7564,6 +9586,13 @@
         swatch.classList.add("active");
         config.data.color = parseInt(swatch.getAttribute("data-color").replace("#", "0x"), 16);
         config.save();
+        if (typeof saveProfileToSupabase === "function") saveProfileToSupabase();
+        if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
+          scene.remove(player.group);
+          player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+          player.group = player.meshData.group;
+          scene.add(player.group);
+        }
       });
     });
 
@@ -7742,8 +9771,67 @@
     document.getElementById("settingTouchControls").addEventListener("change", (e) => {
       config.data.touchControls = e.target.value;
       config.save();
-      updateTouchControlsVisibility();
+      applyDeviceProfile();
     });
+
+    const devProfileEl = document.getElementById("settingDeviceProfile");
+    if (devProfileEl) {
+      devProfileEl.value = config.data.deviceProfile || "auto";
+      devProfileEl.addEventListener("change", (e) => {
+        config.data.deviceProfile = e.target.value;
+        config.save();
+        applyDeviceProfile();
+      });
+    }
+
+    const gyroEl = document.getElementById("settingGyroSteering");
+    if (gyroEl) {
+      gyroEl.value = config.data.gyroSteering || "off";
+      gyroEl.addEventListener("change", (e) => {
+        config.data.gyroSteering = e.target.value;
+        config.save();
+        applyDeviceProfile();
+      });
+    }
+
+    const steerModeEl = document.getElementById("settingMobileSteerMode");
+    if (steerModeEl) {
+      steerModeEl.value = config.data.mobileSteerMode || "buttons";
+      steerModeEl.addEventListener("change", (e) => {
+        config.data.mobileSteerMode = e.target.value;
+        config.save();
+        applyDeviceProfile();
+      });
+    }
+
+    const autoDriveEl = document.getElementById("settingAutoDrive");
+    if (autoDriveEl) {
+      autoDriveEl.value = config.data.autoDrive || "off";
+      autoDriveEl.addEventListener("change", (e) => {
+        config.data.autoDrive = e.target.value;
+        config.save();
+      });
+    }
+
+    const touchSizeEl = document.getElementById("settingTouchSize");
+    if (touchSizeEl) {
+      touchSizeEl.value = config.data.touchSize || "100";
+      touchSizeEl.addEventListener("change", (e) => {
+        config.data.touchSize = e.target.value;
+        config.save();
+        applyDeviceProfile();
+      });
+    }
+
+    const touchOpacityEl = document.getElementById("settingTouchOpacity");
+    if (touchOpacityEl) {
+      touchOpacityEl.value = config.data.touchOpacity || "75";
+      touchOpacityEl.addEventListener("change", (e) => {
+        config.data.touchOpacity = e.target.value;
+        config.save();
+        applyDeviceProfile();
+      });
+    }
 
     updateKeybindButtonsUI();
 
@@ -7761,7 +9849,7 @@
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, config.data.resolution));
-      updateTouchControlsVisibility();
+      applyDeviceProfile();
       checkAndroidOrientation();
     }
 
@@ -7795,12 +9883,46 @@
 
       if (gameState === "playing") {
         const kb = config.data.keybindings;
-        const playerInput = {
-          throttle: (keys[kb.forward] || keys.ArrowUp ? 1 : 0) - (keys[kb.backward] || keys.ArrowDown ? 1 : 0),
-          steer: (keys[kb.left] || keys.ArrowLeft ? 1 : 0) - (keys[kb.right] || keys.ArrowRight ? 1 : 0),
-          drift: !!(keys[kb.drift] || keys.ShiftRight)
-        };
+        let throttle = (keys[kb.forward] || keys.ArrowUp ? 1 : 0) - (keys[kb.backward] || keys.ArrowDown ? 1 : 0);
+        let steer = (keys[kb.left] || keys.ArrowLeft ? 1 : 0) - (keys[kb.right] || keys.ArrowRight ? 1 : 0);
+        let drift = !!(keys[kb.drift] || keys.ShiftRight);
 
+        // Incorporate Gamepad Controller Input
+        const gp = pollGamepadInput();
+        if (gp) {
+          if (Math.abs(gp.throttle) > 0.05) throttle = gp.throttle;
+          if (Math.abs(gp.steer) > 0.05) steer = gp.steer;
+          if (gp.drift) drift = true;
+          if (gp.fire) {
+            if (!player.lastGamepadFire) {
+              triggerPlayerAttack();
+              player.lastGamepadFire = true;
+            }
+          } else {
+            player.lastGamepadFire = false;
+          }
+        }
+
+        // Incorporate Mobile/Tablet Gyroscope Tilt Steering
+        if (config.data.gyroSteering === "on" && Math.abs(gyroSteer) > 0.02) {
+          steer = THREE.MathUtils.clamp(steer + gyroSteer, -1, 1);
+        }
+
+        // Incorporate Smash Karts Virtual Analog Joystick
+        if (config.data.mobileSteerMode === "joystick" && Math.abs(joystickSteerVal) > 0.02) {
+          steer = joystickSteerVal;
+        }
+
+        // Incorporate Smash Karts Auto-Drive Forward
+        if (config.data.autoDrive === "on") {
+          if (keys["KeyS"] || keys.ArrowDown || (keys[kb.backward])) {
+            throttle = -1;
+          } else {
+            throttle = 1;
+          }
+        }
+
+        const playerInput = { throttle, steer, drift };
         player.updatePhysics(dt, playerInput);
         sound.setEngineSpeed(player.speed / player.maxSpeed);
 
@@ -7864,6 +9986,21 @@
 
         renderRadar();
 
+        // Directional Sun Light Follows Player for Ultra-Crisp Shadows
+        if (dirLight && player && player.group) {
+          dirLight.position.set(player.group.position.x + 60, 100, player.group.position.z + 60);
+          dirLight.target.position.copy(player.group.position);
+          dirLight.target.updateMatrixWorld();
+        }
+
+        // Dynamic Speed FOV Expansion
+        const baseFov = config.data.fov || 72;
+        const speedRatioCam = Math.min(1, Math.max(0, Math.abs(player.speed) / 38));
+        const boostBonus = (player.boostTimer > 0 || player.nitroTimer > 0) ? 9 : 0;
+        const targetFov = baseFov + speedRatioCam * 8 + boostBonus;
+        camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 6);
+        camera.updateProjectionMatrix();
+
         if (!player.isDead) {
           const forward = new THREE.Vector3(Math.sin(player.heading), 0, Math.cos(player.heading));
           let desiredCamPos;
@@ -7890,9 +10027,25 @@
 
             camera.position.lerp(desiredCamPos, 1 - Math.pow(0.001, dt));
             camera.lookAt(player.group.position.clone().addScaledVector(forward, 4).add(new THREE.Vector3(0, 1.2, 0)));
+
+            // Dynamic Camera Roll Banking on Turns and Drifts
+            const targetRoll = -player.steer * 0.05 * speedRatioCam + (player.isDrifting ? -player.driftDir * 0.04 : 0);
+            camera.rotation.z += (targetRoll - camera.rotation.z) * Math.min(1, dt * 8);
           }
         }
       } else {
+        if (dirLight) {
+          dirLight.position.set(60, 100, 60);
+          dirLight.target.position.set(0, 0, 0);
+          dirLight.target.updateMatrixWorld();
+        }
+        const baseFov = config.data.fov || 72;
+        if (Math.abs(camera.fov - baseFov) > 0.1) {
+          camera.fov += (baseFov - camera.fov) * Math.min(1, dt * 6);
+          camera.updateProjectionMatrix();
+        }
+        camera.rotation.z = 0;
+
         // Authentic Menu Hero Kart Showcase (matching reference screenshot)
         if (player && player.group) {
           player.group.position.set(0, Math.sin(performance.now() * 0.002) * 0.015, 0);
@@ -7927,32 +10080,69 @@
     }
 
     /* ==========================================================================
-       ANDROID & MOBILE LANDSCAPE ORIENTATION SYSTEM
+       ANDROID & MOBILE LANDSCAPE ORIENTATION ENFORCER (Real Game Horizontal Requirement)
        ========================================================================== */
-    let dismissOrientationPrompt = false;
+    let pendingGameStart = null;
+
+    function isMobileUser() {
+      const ua = navigator.userAgent || "";
+      const isTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+      return isMobileUA || (isTouch && Math.max(window.screen.width, window.screen.height) <= 1024);
+    }
+
+    async function requestLandscapeMode() {
+      try {
+        if (!document.fullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) {
+            await docEl.requestFullscreen();
+          } else if (docEl.webkitRequestFullscreen) {
+            await docEl.webkitRequestFullscreen();
+          }
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape").catch(() => {});
+        }
+      } catch (err) {
+        console.warn("Landscape mode lock error:", err);
+      }
+      setTimeout(onWindowResize, 200);
+    }
 
     function checkAndroidOrientation() {
       const promptEl = document.getElementById("androidRotateOverlay");
-      if (!promptEl) return;
+      if (!promptEl) return true;
 
-      const ua = navigator.userAgent || "";
-      const isAndroid = /Android/i.test(ua);
-      const isMobile = isAndroid || /iPhone|iPad|iPod|Mobile/i.test(ua) || ('ontouchstart' in window && Math.max(window.screen.width, window.screen.height) < 1200);
+      const mobile = isMobileUser();
       const isPortrait = window.innerHeight > window.innerWidth;
 
-      if ((isAndroid || isMobile) && isPortrait && !dismissOrientationPrompt) {
+      if (mobile && isPortrait) {
+        // Enforce horizontal orientation for mobile devices
         promptEl.classList.remove("hidden");
+        if (gameState === "playing" && player) {
+          player.speed = 0;
+        }
+        return false;
       } else {
+        // Device is in landscape or desktop
         promptEl.classList.add("hidden");
+        if (pendingGameStart) {
+          const launch = pendingGameStart;
+          pendingGameStart = null;
+          launch();
+        }
+        return true;
       }
     }
 
-    const dismissRotateBtn = document.getElementById("dismissRotateBtn");
-    if (dismissRotateBtn) {
-      dismissRotateBtn.addEventListener("click", () => {
-        dismissOrientationPrompt = true;
-        document.getElementById("androidRotateOverlay")?.classList.add("hidden");
-      });
+    const enterLandscapeBtn = document.getElementById("enterLandscapeBtn");
+    if (enterLandscapeBtn) {
+      enterLandscapeBtn.addEventListener("click", requestLandscapeMode);
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", onWindowResize);
     }
 
     // Top right HUD squircle buttons & Homepage shortcuts
@@ -8003,12 +10193,13 @@
     const giftBtn = document.getElementById("giftBtn");
     if (giftBtn) {
       giftBtn.addEventListener("click", () => {
-        const coinEl = document.getElementById("coinAmount");
-        if (coinEl) {
-          const nextCoins = parseInt(coinEl.textContent || "0", 10) + 50;
-          coinEl.textContent = nextCoins;
-        }
+        config.data.coins = (config.data.coins || 0) + 50;
+        config.save();
+        if (typeof updatePlayerProgressionUI === "function") updatePlayerProgressionUI();
+        if (typeof bumpBalance === "function") bumpBalance(document.getElementById("coinAmount"));
         sound.playItemCollect();
+        if (typeof showGameToast === "function") showGameToast("🎁 +50 Daily Gift Coins!");
+        if (typeof saveProfileToSupabase === "function") saveProfileToSupabase();
       });
     }
 
@@ -8021,12 +10212,12 @@
 
     const weaponSlotBtn = document.getElementById("weaponSlot");
     if (weaponSlotBtn) {
-      weaponSlotBtn.addEventListener("click", () => {
-        if (gameState === "playing") {
-          if (player.currentWeapon) player.fireWeapon();
-          else player.jumpHop();
-        }
-      });
+      const handleSlotAttack = (e) => {
+        if (e && e.cancelable) e.preventDefault();
+        triggerPlayerAttack();
+      };
+      weaponSlotBtn.addEventListener("click", handleSlotAttack);
+      weaponSlotBtn.addEventListener("touchstart", handleSlotAttack, { passive: false });
     }
 
     /* ==========================================================================
@@ -8057,7 +10248,7 @@
     }, 500);
 
     checkAndroidOrientation();
-    updateTouchControlsVisibility();
+    applyDeviceProfile();
     animate();
   </script>
 </body>

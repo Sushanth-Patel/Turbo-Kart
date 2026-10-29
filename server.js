@@ -5,13 +5,54 @@ const { WebSocketServer, WebSocket } = require("ws");
 
 const PORT = process.env.PORT || 3000;
 
-// HTTP Server for serving index.html and static assets
-const server = http.createServer((req, res) => {
-  let reqUrl = req.url.split("?")[0];
-  if (reqUrl === "/" || reqUrl === "") reqUrl = "/index.html";
+const analytics = require("./analytics");
 
+// Helper to parse JSON request body
+function parseBody(req) {
+  return new Promise((resolve) => {
+    let body = "";
+    req.on("data", chunk => { body += chunk; });
+    req.on("end", () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (e) {
+        resolve({});
+      }
+    });
+  });
+}
+
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  });
+  res.end(JSON.stringify(data));
+}
+
+// HTTP Server for serving index.html, admin.html, API endpoints, and static assets
+const server = http.createServer(async (req, res) => {
+  const urlObj = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  let reqUrl = urlObj.pathname;
+
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type"
+    });
+    return res.end();
+  }
+
+  // Rewrite routes
+  if (reqUrl === "/" || reqUrl === "") reqUrl = "/index.html";
+  if (reqUrl === "/admin" || reqUrl === "/admin/") reqUrl = "/admin.html";
+
+  // System & Game Status
   if (reqUrl === "/status") {
-    res.writeHead(200, { "Content-Type": "application/json" });
     const roomSummaries = Array.from(rooms.entries()).map(([code, r]) => ({
       code,
       players: r.players.size,
@@ -19,12 +60,82 @@ const server = http.createServer((req, res) => {
       mapId: r.mapId,
       inGame: r.inGame
     }));
-    return res.end(JSON.stringify({ status: "online", activeRooms: rooms.size, rooms: roomSummaries }));
+    return sendJson(res, 200, {
+      status: "online",
+      activeRooms: rooms.size,
+      totalPlayers: Array.from(rooms.values()).reduce((sum, r) => sum + r.players.size, 0),
+      rooms: roomSummaries
+    });
   }
 
+  // =========================================================================
+  // ANALYTICS & ADMIN API ENDPOINTS (SEPARATED FOR ANALYTIC PURPOSE)
+  // =========================================================================
+
+  // 1. Analytics Summary (Traffic, Devices: Android vs Desktop vs Other, KPIs)
+  if (reqUrl === "/api/analytics/summary" && req.method === "GET") {
+    const timeRange = urlObj.searchParams.get("timeRange") || "7d";
+    const totalPlayersOnline = Array.from(rooms.values()).reduce((sum, r) => sum + r.players.size, 0);
+    const summary = await analytics.getSummary(timeRange, {
+      activeRooms: rooms.size,
+      playersOnline: totalPlayersOnline
+    });
+    return sendJson(res, 200, summary);
+  }
+
+  // 2. Registered Players List (Search, Filter by Device / Status, Sort)
+  if (reqUrl === "/api/analytics/players" && req.method === "GET") {
+    const search = urlObj.searchParams.get("search") || "";
+    const device = urlObj.searchParams.get("device") || "all";
+    const status = urlObj.searchParams.get("status") || "all";
+    const sortBy = urlObj.searchParams.get("sortBy") || "recent";
+    const limit = parseInt(urlObj.searchParams.get("limit") || "50", 10);
+    const page = parseInt(urlObj.searchParams.get("page") || "1", 10);
+
+    const result = await analytics.getPlayers({ search, device, status, sortBy, limit, page });
+    return sendJson(res, 200, result);
+  }
+
+  // 3. Track Traffic / Visitor Beacon (Android, Desktop, Other devices)
+  if (reqUrl === "/api/analytics/track" && req.method === "POST") {
+    const body = await parseBody(req);
+    const result = analytics.trackVisit(body, req);
+    return sendJson(res, 200, result);
+  }
+
+  // 4. Register New Player / Update Racer Account
+  if (reqUrl === "/api/auth/register" && req.method === "POST") {
+    const body = await parseBody(req);
+    const result = analytics.registerPlayer(body, req);
+    return sendJson(res, 200, result);
+  }
+
+  // 5. Export Analytics or Players Data (CSV / JSON)
+  if (reqUrl === "/api/analytics/export" && req.method === "GET") {
+    const format = urlObj.searchParams.get("format") || "csv";
+    const type = urlObj.searchParams.get("type") || "players";
+    const exported = analytics.exportData(format, type);
+
+    const contentType = format === "json" ? "application/json" : "text/csv; charset=utf-8";
+    const filename = `turbokart_${type}_${new Date().toISOString().split("T")[0]}.${format}`;
+
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Access-Control-Allow-Origin": "*"
+    });
+    return res.end(exported);
+  }
+
+  // Static files handling
   if (reqUrl === "/favicon.ico") {
     res.writeHead(204);
     return res.end();
+  }
+
+  // Auto-track landing on /index.html
+  if (reqUrl === "/index.html") {
+    analytics.trackVisit({ page: "/" }, req);
   }
 
   const filePath = path.join(__dirname, reqUrl);
@@ -42,6 +153,7 @@ const server = http.createServer((req, res) => {
       ".json": "application/json",
       ".png": "image/png",
       ".jpg": "image/jpeg",
+      ".svg": "image/svg+xml",
       ".ico": "image/x-icon"
     };
 
@@ -49,6 +161,7 @@ const server = http.createServer((req, res) => {
     res.end(data);
   });
 });
+
 
 // WebSocket Server for Multi-Room Realtime Battle Arena
 const wss = new WebSocketServer({ server });
