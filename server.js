@@ -170,7 +170,15 @@ const server = http.createServer(async (req, res) => {
       ".ico": "image/x-icon"
     };
 
-    res.writeHead(200, { "Content-Type": mimeTypes[ext] || "application/octet-stream" });
+    const isHtml = ext === ".html";
+    const headers = {
+      "Content-Type": mimeTypes[ext] || "application/octet-stream",
+      "Cache-Control": isHtml ? "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" : "public, max-age=86400",
+      "Pragma": isHtml ? "no-cache" : "public",
+      "Expires": isHtml ? "0" : "86400"
+    };
+
+    res.writeHead(200, headers);
     res.end(data);
   });
 });

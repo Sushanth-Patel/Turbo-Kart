@@ -3540,6 +3540,9 @@
             <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
           </span>
         </button>
+        <div class="turbo-version-pill" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(239, 68, 68, 0.25)); border:1px solid #f59e0b; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; color:#fbbf24; letter-spacing:0.5px;">
+          <span>⚡</span> SMASH KARTS REPLICA v3.2
+        </div>
         <button id="menuAudioBtn" class="turbo-header-btn turbo-audio-btn" title="Toggle Sound FX & Engine" aria-label="Toggle Sound">
           <span class="turbo-btn-icon-svg" style="font-size: 14px;">🔊</span>
         </button>
@@ -5685,33 +5688,41 @@
       const cv = document.createElement("canvas");
       cv.width = 256; cv.height = 256;
       const c = cv.getContext("2d");
-      // Rich red base
-      c.fillStyle = "#dc2626";
+      // Glowing golden glass gradient
+      const grad = c.createRadialGradient(128, 128, 20, 128, 128, 140);
+      grad.addColorStop(0, "#fbbf24");
+      grad.addColorStop(0.65, "#f59e0b");
+      grad.addColorStop(1, "#d97706");
+      c.fillStyle = grad;
       c.fillRect(0, 0, 256, 256);
-      // Outer golden-yellow rounded frame
-      c.lineWidth = 24;
-      c.strokeStyle = "#facc15";
-      c.strokeRect(12, 12, 232, 232);
-      // Inner shadow border
-      c.lineWidth = 6;
-      c.strokeStyle = "#991b1b";
-      c.strokeRect(26, 26, 204, 204);
-      // Question mark drop shadow
-      c.fillStyle = "rgba(0, 0, 0, 0.4)";
-      c.font = "900 160px sans-serif";
+      // Bright golden border
+      c.lineWidth = 18;
+      c.strokeStyle = "#fef08a";
+      c.strokeRect(10, 10, 236, 236);
+      // Inner subtle border
+      c.lineWidth = 4;
+      c.strokeStyle = "rgba(255, 255, 255, 0.6)";
+      c.strokeRect(22, 22, 212, 212);
+      // Question mark shadow
+      c.fillStyle = "rgba(120, 53, 15, 0.85)";
+      c.font = "900 168px sans-serif";
       c.textAlign = "center";
       c.textBaseline = "middle";
       c.fillText("?", 134, 138);
-      // Vibrant yellow question mark
-      c.fillStyle = "#fef08a";
+      // Crisp white question mark with golden rim
+      c.fillStyle = "#ffffff";
       c.fillText("?", 128, 132);
       return new THREE.CanvasTexture(cv);
     }
 
     const qBoxMat = new THREE.MeshStandardMaterial({
       map: createQBoxTexture(),
-      roughness: 0.25, metalness: 0.15,
-      emissive: 0xdc2626, emissiveIntensity: 0.35
+      roughness: 0.15,
+      metalness: 0.35,
+      transparent: true,
+      opacity: 0.94,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.45
     });
 
     // 24 Mystery Boxes distributed across central plaza, inner lanes, mid quadrants, and outer ring
@@ -5855,6 +5866,30 @@
         scene.add(mesh);
         particles.push({ mesh, vel, life: 0.3 + Math.random() * 0.2, maxLife: 0.5, scaleDown: true });
       }
+    }
+
+    // Floating 3D Damage Numbers (Authentic Smash Karts Style)
+    const damageNumbers = [];
+    function spawnDamageNumber(x, y, z, amount, isSmash = false) {
+      const cv = document.createElement("canvas");
+      cv.width = 256; cv.height = 96;
+      const ctx = cv.getContext("2d");
+      ctx.font = isSmash ? "900 40px 'Outfit', sans-serif" : "900 34px 'Outfit', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillStyle = isSmash ? "#ef4444" : "#facc15";
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 6;
+      const txt = isSmash ? `💥 -${Math.round(amount)} SMASH!` : `-${Math.round(amount)}`;
+      ctx.strokeText(txt, 128, 56);
+      ctx.fillText(txt, 128, 56);
+
+      const tex = new THREE.CanvasTexture(cv);
+      const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(3.8, 1.4, 1);
+      sprite.position.set(x + (Math.random() - 0.5) * 0.8, y + 2.4, z + (Math.random() - 0.5) * 0.8);
+      scene.add(sprite);
+      damageNumbers.push({ sprite, life: 1.1, vy: 2.5 });
     }
 
     // Drift Skid Marks
@@ -6477,6 +6512,8 @@
         this.hp = Math.max(0, this.hp - amount);
         if (this.meshData.overhead) this.meshData.overhead.update(this.hp);
 
+        spawnDamageNumber(this.group.position.x, this.group.position.y, this.group.position.z, amount, this.hp <= 0);
+
         this.meshData.bodyMat.color.setHex(0xffffff);
         setTimeout(() => {
           if (this.meshData) this.meshData.bodyMat.color.setHex(this.color);
@@ -6522,7 +6559,7 @@
             } else if (attacker.killStreak >= 5) {
               triggerAnnouncer("UNSTOPPABLE RAMPAGE! ⚡");
             } else {
-              triggerAnnouncer("SMASH! +100");
+              triggerAnnouncer("💥 SMASHED " + this.name.toUpperCase() + "! +100");
             }
             triggerScreenShake(0.5);
           }
@@ -10198,8 +10235,22 @@
         });
       }
 
-      for (let i = 0; i < animatedMapElements.length; i++) {
+      for (let i = animatedMapElements.length - 1; i >= 0; i--) {
         animatedMapElements[i].update(dt);
+      }
+
+      // Update & Fade Floating 3D Arcade Damage Numbers (Smash Karts style)
+      for (let i = damageNumbers.length - 1; i >= 0; i--) {
+        const d = damageNumbers[i];
+        d.life -= dt;
+        d.sprite.position.y += d.vy * dt;
+        d.sprite.material.opacity = Math.max(0, d.life / 1.1);
+        if (d.life <= 0) {
+          scene.remove(d.sprite);
+          if (d.sprite.material.map) d.sprite.material.map.dispose();
+          d.sprite.material.dispose();
+          damageNumbers.splice(i, 1);
+        }
       }
 
       updateParticles(dt);
