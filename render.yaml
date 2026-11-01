@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: turbo-smash-karts-3d
+    name: turbo-kart
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server.js
     envVars:
       - key: NODE_VERSION
-        value: 18.17.0
+        value: 20.18.0
