@@ -4572,20 +4572,37 @@
         osc.stop(this.ctx.currentTime + 0.16);
       }
 
-      playDriftSpark(isSuper = false) {
+      playHop() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(340, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(560, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+      }
+
+      playDriftSpark(stage = 1) {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = "triangle";
-        const f = isSuper ? 1350 : 880;
+        let f = 880;
+        if (stage === 2 || stage === true) f = 1350;
+        else if (stage === 3) f = 1760;
         osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(f * 1.4, this.ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+        osc.frequency.exponentialRampToValueAtTime(f * 1.35, this.ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(stage === 3 ? 0.2 : 0.12, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (stage === 3 ? 0.09 : 0.06));
         osc.connect(gain);
         gain.connect(this.sfxGain);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.07);
+        osc.stop(this.ctx.currentTime + (stage === 3 ? 0.1 : 0.07));
       }
     }
 
@@ -6731,7 +6748,7 @@
 
         this.speed = THREE.MathUtils.clamp(this.speed, -15, effectiveMaxSpeed);
 
-        // Two-Stage Mini-Turbo Drifting
+        // Authentic 3-Stage Smash Karts Mini-Turbo Drifting
         const wantDrift = !!input.drift;
         if (wantDrift && !this.isDrifting && Math.abs(this.speed) > 10) {
           this.isDrifting = true;
@@ -6740,7 +6757,29 @@
           this.driftDir = input.steer < -0.1 ? -1 : (input.steer > 0.1 ? 1 : (this.steer < 0 ? -1 : 1));
           if (this.y <= 0.05) this.jumpHop();
         } else if (!wantDrift && this.isDrifting) {
-          if (this.driftStage === 1) {
+          if (this.driftStage === 3) {
+            // Ultra Mini-Turbo (Purple Fire Burst)
+            this.speed = Math.min(this.speed + 26, 68);
+            this.boostTimer = 2.6;
+            sound.playTurbo();
+            spawnShockwave(this.group.position.x, this.y, this.group.position.z, 0xa855f7);
+            if (!this.isBot && !this.isRemote) {
+              triggerScreenShake(0.42);
+              if (navigator.vibrate) navigator.vibrate([60, 40, 80]);
+              showGameToast("⚡ ULTRA MINI-TURBO!");
+            }
+          } else if (this.driftStage === 2) {
+            // Super Mini-Turbo (Orange Fire Burst)
+            this.speed = Math.min(this.speed + 19, 58);
+            this.boostTimer = 1.8;
+            sound.playTurbo();
+            spawnShockwave(this.group.position.x, this.y, this.group.position.z, 0xf97316);
+            if (!this.isBot && !this.isRemote) {
+              triggerScreenShake(0.30);
+              if (navigator.vibrate) navigator.vibrate([45, 30, 45]);
+            }
+          } else if (this.driftStage === 1) {
+            // Standard Mini-Turbo (Blue Spark Burst)
             this.speed = Math.min(this.speed + 11, 52);
             this.boostTimer = 1.1;
             sound.playTurbo();
@@ -6748,15 +6787,6 @@
             if (!this.isBot && !this.isRemote) {
               triggerScreenShake(0.18);
               if (navigator.vibrate) navigator.vibrate(35);
-            }
-          } else if (this.driftStage === 2) {
-            this.speed = Math.min(this.speed + 19, 58);
-            this.boostTimer = 1.9;
-            sound.playTurbo();
-            spawnShockwave(this.group.position.x, this.y, this.group.position.z, 0xf97316);
-            if (!this.isBot && !this.isRemote) {
-              triggerScreenShake(0.32);
-              if (navigator.vibrate) navigator.vibrate([45, 30, 45]);
             }
           }
           this.isDrifting = false;
@@ -6774,9 +6804,18 @@
             spawnSmokePuff(rearOffsetR.x, rearOffsetR.y, rearOffsetR.z, 0x94a3b8);
           }
 
-          if (this.driftTime >= 1.1) {
+          if (this.driftTime >= 2.0) {
+            if (this.driftStage < 3) {
+              sound.playDriftSpark(3);
+              this.driftStage = 3;
+            }
+            if (Math.random() < 0.65) {
+              spawnDriftSparks(rearOffsetL.x, rearOffsetL.y, rearOffsetL.z, 0xa855f7, 3);
+              spawnDriftSparks(rearOffsetR.x, rearOffsetR.y, rearOffsetR.z, 0xa855f7, 3);
+            }
+          } else if (this.driftTime >= 1.15) {
             if (this.driftStage < 2) {
-              sound.playDriftSpark(true);
+              sound.playDriftSpark(2);
               this.driftStage = 2;
             }
             if (Math.random() < 0.55) {
@@ -6785,7 +6824,7 @@
             }
           } else if (this.driftTime >= 0.45) {
             if (this.driftStage < 1) {
-              sound.playDriftSpark(false);
+              sound.playDriftSpark(1);
               this.driftStage = 1;
             }
             if (Math.random() < 0.55) {
@@ -6806,11 +6845,16 @@
         this.steer += (input.steer * sens - this.steer) * Math.min(1, dt * 12);
 
         const speedRatio = Math.min(1, Math.abs(this.speed) / 10);
-        const turnMult = this.isDrifting ? 3.3 : 2.1;
+        const turnMult = this.isDrifting ? 3.4 : 2.1;
         this.heading += (this.steer * turnMult + (this.isDrifting ? this.driftDir * 0.45 : 0)) * speedRatio * dt * (this.speed >= 0 ? 1 : -1);
 
         const forward = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading));
+        const lateral = new THREE.Vector3(Math.cos(this.heading), 0, -Math.sin(this.heading));
+        const driftSlide = this.isDrifting ? this.driftDir * Math.min(7.5, Math.abs(this.speed) * 0.16) : 0;
         this.group.position.addScaledVector(forward, this.speed * dt);
+        if (driftSlide !== 0) {
+          this.group.position.addScaledVector(lateral, -driftSlide * dt);
+        }
 
         // Jump Hop on input
         if (input.jump && this.y <= 0.05) {
@@ -7955,9 +7999,31 @@
             a.group.position.addScaledVector(push, 0.5);
             b.group.position.addScaledVector(push, -0.5);
 
-            if (a.nitroTimer > 0 && b.nitroTimer <= 0) b.takeDamage(100, a);
-            else if (b.nitroTimer > 0 && a.nitroTimer <= 0) a.takeDamage(100, b);
-            else { a.speed *= 0.7; b.speed *= 0.7; }
+            // Invincible Nitro Star Collision
+            if (a.nitroTimer > 0 && b.nitroTimer <= 0) {
+              b.takeDamage(100, a);
+              spawnShockwave(b.group.position.x, 1.0, b.group.position.z, 0xa855f7);
+              sound.playExplosion();
+            } else if (b.nitroTimer > 0 && a.nitroTimer <= 0) {
+              a.takeDamage(100, b);
+              spawnShockwave(a.group.position.x, 1.0, a.group.position.z, 0xa855f7);
+              sound.playExplosion();
+            } 
+            // Spiky-Go-Round Ramming Collision
+            else if (a.spikyTimer > 0 && b.spikyTimer <= 0) {
+              b.takeDamage(75, a);
+              b.speed *= -0.6;
+              spawnExplosionParticles(b.group.position.x, 1.2, b.group.position.z, 0xef4444, 20);
+              sound.playExplosion();
+            } else if (b.spikyTimer > 0 && a.spikyTimer <= 0) {
+              a.takeDamage(75, b);
+              a.speed *= -0.6;
+              spawnExplosionParticles(a.group.position.x, 1.2, a.group.position.z, 0xef4444, 20);
+              sound.playExplosion();
+            } else {
+              a.speed *= 0.7;
+              b.speed *= 0.7;
+            }
           }
         }
       }
@@ -10026,7 +10092,24 @@
         document.getElementById("healthFill").style.width = `${Math.max(0, player.hp)}%`;
         document.getElementById("healthText").textContent = `${Math.ceil(player.hp)} HP`;
         document.getElementById("speedDisplay").textContent = `${Math.round(Math.abs(player.speed) * 3)}`;
-        document.getElementById("driftFill").style.width = `${Math.min(100, (player.driftTime / 1.2) * 100)}%`;
+        const driftEl = document.getElementById("driftFill");
+        if (driftEl) {
+          const driftPct = Math.min(100, (player.driftTime / 2.0) * 100);
+          driftEl.style.width = `${driftPct}%`;
+          if (player.driftStage === 3) {
+            driftEl.style.background = "linear-gradient(90deg, #a855f7, #ec4899)";
+            driftEl.style.boxShadow = "0 0 16px rgba(168, 85, 247, 0.9)";
+          } else if (player.driftStage === 2) {
+            driftEl.style.background = "linear-gradient(90deg, #f59e0b, #ef4444)";
+            driftEl.style.boxShadow = "0 0 10px rgba(245, 158, 11, 0.8)";
+          } else if (player.driftStage === 1) {
+            driftEl.style.background = "linear-gradient(90deg, #38bdf8, #0284c7)";
+            driftEl.style.boxShadow = "0 0 8px rgba(56, 189, 248, 0.7)";
+          } else {
+            driftEl.style.background = "linear-gradient(90deg, #64748b, #94a3b8)";
+            driftEl.style.boxShadow = "none";
+          }
+        }
 
         renderRadar();
 
