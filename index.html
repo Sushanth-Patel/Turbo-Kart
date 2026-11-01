@@ -3852,6 +3852,16 @@
       </div>
 
       <div class="garage-section">
+        <div class="garage-section-title">Driver Character (Smash Karts 3D)</div>
+        <div class="selection-chips" id="characterSelector">
+          <div class="chip-btn active" data-character="cat"><span class="icon">🐱</span> Cat</div>
+          <div class="chip-btn" data-character="dog"><span class="icon">🐶</span> Dog</div>
+          <div class="chip-btn" data-character="frog"><span class="icon">🐸</span> Frog</div>
+          <div class="chip-btn" data-character="panda"><span class="icon">🐼</span> Panda</div>
+        </div>
+      </div>
+
+      <div class="garage-section">
         <div class="garage-section-title">Kart Chassis</div>
         <div class="selection-chips" id="chassisSelector">
           <div class="chip-btn active" data-chassis="standard"><span class="icon">🏎️</span> Standard</div>
@@ -4279,6 +4289,7 @@
       constructor() {
         this.defaults = {
           username: "TurnpikeTorqu",
+          character: "cat",
           chassis: "standard",
           hat: "crown",
           wheels: "slicks",
@@ -4463,7 +4474,20 @@
         noise.start();
       }
 
+      playAudioClip(url) {
+        try {
+          const a = new Audio(url);
+          a.volume = Math.max(0, Math.min(1, (config.data.masterVol / 100) * 0.85));
+          a.play().catch(() => {});
+        } catch(e) {}
+      }
+
+      playBoxPop() {
+        this.playAudioClip("assets/audio/BALLOON_Pop_Real_01_mono.m4a.ogg");
+      }
+
       playPickup() {
+        this.playAudioClip("assets/audio/collectable_item_bonus_03.m4a.ogg");
         if (!this.ctx) return;
         const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
@@ -6008,9 +6032,134 @@
     }
 
     /* ==========================================================================
-       PROCEDURAL 3D KART BUILDER
+       AUTHENTIC SMASH KARTS 3D ASSETS ENGINE (Extracted via REA MCP)
        ========================================================================== */
-    function buildKartMesh(colorHex, hatType = "crown", chassisType = "standard", wheelType = "slicks", name = "Racer") {
+    function parseOBJ(text) {
+      const positions = [], uvs = [], normals = [];
+      const finalPos = [], finalUv = [], finalNorm = [];
+      const lines = text.split("\n");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith("v ")) {
+          const parts = line.split(/\s+/).slice(1).map(Number);
+          positions.push(parts[0], parts[1], parts[2]);
+        } else if (line.startsWith("vt ")) {
+          const parts = line.split(/\s+/).slice(1).map(Number);
+          uvs.push(parts[0], parts[1]);
+        } else if (line.startsWith("vn ")) {
+          const parts = line.split(/\s+/).slice(1).map(Number);
+          normals.push(parts[0], parts[1], parts[2]);
+        } else if (line.startsWith("f ")) {
+          const parts = line.split(/\s+/).slice(1);
+          for (let j = 1; j < parts.length - 1; j++) {
+            const tri = [parts[0], parts[j], parts[j + 1]];
+            for (const vertex of tri) {
+              const indices = vertex.split("/");
+              const vIdx = (parseInt(indices[0]) - 1) * 3;
+              finalPos.push(positions[vIdx], positions[vIdx + 1], positions[vIdx + 2]);
+              if (indices[1] && uvs.length) {
+                const vtIdx = (parseInt(indices[1]) - 1) * 2;
+                finalUv.push(uvs[vtIdx], uvs[vtIdx + 1]);
+              }
+              if (indices[2] && normals.length) {
+                const vnIdx = (parseInt(indices[2]) - 1) * 3;
+                finalNorm.push(normals[vnIdx], normals[vnIdx + 1], normals[vnIdx + 2]);
+              }
+            }
+          }
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(finalPos, 3));
+      if (finalUv.length) geo.setAttribute("uv", new THREE.Float32BufferAttribute(finalUv, 2));
+      if (finalNorm.length) geo.setAttribute("normal", new THREE.Float32BufferAttribute(finalNorm, 3));
+      else geo.computeVertexNormals();
+      return geo;
+    }
+
+    const smashAssets = {
+      geometries: {},
+      textures: {}
+    };
+
+    const smashTexLoader = new THREE.TextureLoader();
+    function loadPixelTexture(url) {
+      if (!smashAssets.textures[url]) {
+        const t = smashTexLoader.load(url);
+        t.magFilter = THREE.NearestFilter;
+        t.minFilter = THREE.NearestFilter;
+        smashAssets.textures[url] = t;
+      }
+      return smashAssets.textures[url];
+    }
+
+    async function loadSmashModel(name, url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const text = await res.text();
+        const geo = parseOBJ(text);
+        smashAssets.geometries[name] = geo;
+        return geo;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const SMASH_MODELS = [
+      { name: "cat_head", url: "assets/models/CatHead.obj" },
+      { name: "cat_body", url: "assets/models/Cat2Body.obj" },
+      { name: "dog_head", url: "assets/models/dogRetroHead.obj" },
+      { name: "dog_body", url: "assets/models/dogRetroBody.obj" },
+      { name: "frog_head", url: "assets/models/FrogHead.obj" },
+      { name: "frog_body", url: "assets/models/FrogBody.obj" },
+      { name: "panda_head", url: "assets/models/PandaHead.obj" },
+      { name: "panda_body", url: "assets/models/PandaBody.obj" },
+      { name: "wheel_slicks", url: "assets/models/kartWheel01_slicks.obj" },
+      { name: "mystery_box", url: "assets/models/ColletBoxDecoy.obj" },
+      { name: "captain_hat", url: "assets/models/CaptainHat.obj" },
+      { name: "wizard_hat", url: "assets/models/wizardHat.obj" },
+      { name: "kings_hat", url: "assets/models/kings_hat.obj" }
+    ];
+
+    function rebuildHeroKart() {
+      if (player && typeof buildKartMesh === "function" && scene) {
+        const oldPos = player.group.position.clone();
+        const oldRot = player.group.rotation.clone();
+        scene.remove(player.group);
+        player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username, config.data.character);
+        player.group = player.meshData.group;
+        player.group.position.copy(oldPos);
+        player.group.rotation.copy(oldRot);
+        scene.add(player.group);
+        if (gameState === "menu" && player.meshData.overhead && player.meshData.overhead.sprite) {
+          player.meshData.overhead.sprite.visible = false;
+        }
+      }
+    }
+
+    function upgradeMysteryBoxes() {
+      if (smashAssets.geometries["mystery_box"]) {
+        mysteryBoxes.forEach(box => {
+          if (box && box.cube) {
+            box.cube.geometry = smashAssets.geometries["mystery_box"];
+            box.cube.scale.set(0.52, 0.52, 0.52);
+          }
+        });
+      }
+    }
+
+    // Pre-fetch all extracted Smash Karts 3D models in background
+    Promise.all(SMASH_MODELS.map(m => loadSmashModel(m.name, m.url))).then(() => {
+      console.log("⚡ Official Smash Karts 3D assets loaded successfully!");
+      rebuildHeroKart();
+      upgradeMysteryBoxes();
+    });
+
+    /* ==========================================================================
+       PROCEDURAL & AUTHENTIC 3D KART BUILDER
+       ========================================================================== */
+    function buildKartMesh(colorHex, hatType = "crown", chassisType = "standard", wheelType = "slicks", name = "Racer", charType = "cat") {
       const group = new THREE.Group();
 
       const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, metalness: 0.35, roughness: 0.3 });
@@ -6083,107 +6232,76 @@
       seat.position.set(0, 0.55, -0.38);
       group.add(seat);
 
-      // Authentic Smash Karts Cartoon Animal Character Driver (Cute Cat with ears, snout, big eyes)
+      // Authentic Smash Karts Cartoon Animal Character Driver (Cat, Dog, Frog, Panda)
       const charGroup = new THREE.Group();
-      charGroup.position.set(0, 0.98, -0.08);
-      // Face slightly toward camera to match reference image hero gaze
-      charGroup.rotation.y = 0.28;
+      charGroup.position.set(0, 0.72, -0.12);
 
-      // Character Torso
-      const torsoMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.45 });
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.46, 12), torsoMat);
-      torso.position.set(0, 0.18, 0);
-      charGroup.add(torso);
+      const charKey = (charType || config.data.character || "cat").toLowerCase();
+      const charMap = {
+        cat: { headGeo: "cat_head", headTex: "assets/textures/Char_CatHead_Skin1.png", bodyGeo: "cat_body", bodyTex: "assets/textures/Char_CatBody_Skin1.png", scale: 0.72, headY: 0.38, bodyY: 0.08 },
+        dog: { headGeo: "dog_head", headTex: "assets/textures/Char_DogHead_Skin1.png", bodyGeo: "dog_body", bodyTex: "assets/textures/Char_DogBody_Skin1.png", scale: 0.70, headY: 0.36, bodyY: 0.08 },
+        frog: { headGeo: "frog_head", headTex: "assets/textures/Char_FrogHead_Skin1.png", bodyGeo: "frog_body", bodyTex: "assets/textures/Char_FrogBody_Skin1.png", scale: 0.70, headY: 0.36, bodyY: 0.08 },
+        panda: { headGeo: "panda_head", headTex: "assets/textures/Char_PandaHead_Skin1.png", bodyGeo: "panda_body", bodyTex: "assets/textures/Char_PandaBody_Skin1.png", scale: 0.70, headY: 0.36, bodyY: 0.08 }
+      };
 
-      // Character Head (Soft rounded cartoon animal head)
-      const headMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.4 });
-      const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.44, 20, 18), headMat);
-      headMesh.position.set(0, 0.52, 0);
-      charGroup.add(headMesh);
+      const selChar = charMap[charKey] || charMap.cat;
 
-      // Cat Ears
-      const earGeo = new THREE.ConeGeometry(0.16, 0.32, 6);
-      const earMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.5 });
-      const earInnerMat = new THREE.MeshStandardMaterial({ color: 0xfca5a5, roughness: 0.6 });
-      const earL = new THREE.Mesh(earGeo, earMat);
-      earL.position.set(-0.26, 0.92, -0.04);
-      earL.rotation.z = 0.38;
-      earL.rotation.x = -0.12;
-      const earInnerL = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.22, 6), earInnerMat);
-      earInnerL.position.set(0, 0.02, 0.05);
-      earL.add(earInnerL);
-      charGroup.add(earL);
+      if (smashAssets.geometries[selChar.headGeo]) {
+        // Official Smash Karts Extracted 3D Head
+        const hTex = loadPixelTexture(selChar.headTex);
+        const hMat = new THREE.MeshStandardMaterial({ map: hTex, roughness: 0.38, metalness: 0.05 });
+        const realHead = new THREE.Mesh(smashAssets.geometries[selChar.headGeo], hMat);
+        const sc = selChar.scale;
+        realHead.scale.set(sc, sc, sc);
+        realHead.position.set(0, selChar.headY, 0);
+        charGroup.add(realHead);
 
-      const earR = new THREE.Mesh(earGeo, earMat);
-      earR.position.set(0.26, 0.92, -0.04);
-      earR.rotation.z = -0.38;
-      earR.rotation.x = -0.12;
-      const earInnerR = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.22, 6), earInnerMat);
-      earInnerR.position.set(0, 0.02, 0.05);
-      earR.add(earInnerR);
-      charGroup.add(earR);
+        // Official Smash Karts Extracted 3D Body
+        if (smashAssets.geometries[selChar.bodyGeo]) {
+          const bTex = loadPixelTexture(selChar.bodyTex);
+          const bMat = new THREE.MeshStandardMaterial({ map: bTex, roughness: 0.45, metalness: 0.05 });
+          const realBody = new THREE.Mesh(smashAssets.geometries[selChar.bodyGeo], bMat);
+          realBody.scale.set(sc * 0.95, sc * 0.95, sc * 0.95);
+          realBody.position.set(0, selChar.bodyY, 0);
+          charGroup.add(realBody);
+        }
+      } else {
+        // High-Quality Cartoon Animal Fallback
+        const torsoMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.45 });
+        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.46, 12), torsoMat);
+        torso.position.set(0, 0.18, 0);
+        charGroup.add(torso);
 
-      // Cute Snout / Muzzle Cheeks
-      const muzzleMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.22, 14, 12),
-        new THREE.MeshStandardMaterial({ color: 0xffedd5, roughness: 0.55 })
-      );
-      muzzleMesh.position.set(0, 0.46, 0.32);
-      muzzleMesh.scale.set(1.15, 0.75, 0.72);
-      charGroup.add(muzzleMesh);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.4 });
+        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.44, 20, 18), headMat);
+        headMesh.position.set(0, 0.52, 0);
+        charGroup.add(headMesh);
 
-      // Cute Pink Nose
-      const noseMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.055, 8, 8),
-        new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3 })
-      );
-      noseMesh.position.set(0, 0.52, 0.46);
-      charGroup.add(noseMesh);
+        const earGeo = new THREE.ConeGeometry(0.16, 0.32, 6);
+        const earMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.5 });
+        const earL = new THREE.Mesh(earGeo, earMat);
+        earL.position.set(-0.26, 0.92, -0.04);
+        earL.rotation.z = 0.38;
+        charGroup.add(earL);
 
-      // Happy Wide Open Smiling Mouth with White Teeth (Image 1:1 match)
-      const mouthGeo = new THREE.CylinderGeometry(0.18, 0.16, 0.14, 14, 1, false, 0, Math.PI);
-      mouthGeo.rotateX(Math.PI / 2);
-      const mouthMat = new THREE.MeshBasicMaterial({ color: 0x881337 });
-      const mouthMesh = new THREE.Mesh(mouthGeo, mouthMat);
-      mouthMesh.position.set(0, 0.36, 0.36);
-      mouthMesh.rotation.x = 0.22;
-      charGroup.add(mouthMesh);
+        const earR = new THREE.Mesh(earGeo, earMat);
+        earR.position.set(0.26, 0.92, -0.04);
+        earR.rotation.z = -0.38;
+        charGroup.add(earR);
 
-      // 3 Distinct White Square Upper Teeth
-      const toothMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      [-0.07, 0, 0.07].forEach(tx => {
-        const tMesh = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.042, 0.04), toothMat);
-        tMesh.position.set(tx, 0.41, 0.39);
-        charGroup.add(tMesh);
-      });
+        const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+        [-0.16, 0.16].forEach(x => {
+          const eye = new THREE.Mesh(new THREE.SphereGeometry(0.145, 16, 14), eyeWhiteMat);
+          eye.position.set(x, 0.62, 0.31);
+          const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.082, 12, 12), pupilMat);
+          pupil.position.set(0, 0, 0.098);
+          eye.add(pupil);
+          charGroup.add(eye);
+        });
+      }
 
-      // Pink Tongue
-      const tongueMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.07, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0xf43f5e })
-      );
-      tongueMesh.position.set(0, 0.33, 0.38);
-      tongueMesh.scale.set(1.2, 0.6, 0.9);
-      charGroup.add(tongueMesh);
-
-      // Big Round Cartoon Eyes with Dark Pupils & White Glimmer Highlights
-      const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
-      const glimmerMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-      [-0.16, 0.16].forEach(x => {
-        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.145, 16, 14), eyeWhiteMat);
-        eye.position.set(x, 0.62, 0.31);
-        const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.082, 12, 12), pupilMat);
-        pupil.position.set(x > 0 ? 0.012 : -0.012, 0, 0.098);
-        const glim = new THREE.Mesh(new THREE.SphereGeometry(0.032, 6, 6), glimmerMat);
-        glim.position.set(0.024, 0.024, 0.068);
-        pupil.add(glim);
-        eye.add(pupil);
-        charGroup.add(eye);
-      });
-
-      // Lowered Steering wheel and paws so the smiling face is completely clear
+      // Steering wheel and paws
       const wheelRing = new THREE.Mesh(
         new THREE.TorusGeometry(0.24, 0.035, 8, 16),
         new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 })
@@ -6191,14 +6309,6 @@
       wheelRing.rotation.x = 0.75;
       wheelRing.position.set(0, 0.18, 0.44);
       charGroup.add(wheelRing);
-
-      const pawGeo = new THREE.SphereGeometry(0.09, 8, 8);
-      const pawL = new THREE.Mesh(pawGeo, headMat);
-      pawL.position.set(-0.22, 0.19, 0.42);
-      charGroup.add(pawL);
-      const pawR = new THREE.Mesh(pawGeo, headMat);
-      pawR.position.set(0.22, 0.19, 0.42);
-      charGroup.add(pawR);
 
       group.add(charGroup);
 
@@ -6336,10 +6446,22 @@
 
       function addWheel(x, z, steerable) {
         const sGroup = new THREE.Group();
-        sGroup.position.set(x, 0.5, z);
-        const w = new THREE.Mesh(wheelGeo, tireMat);
-        const r = new THREE.Mesh(rimGeo, rimMat);
-        w.add(r);
+        sGroup.position.set(x, 0.44, z);
+        let w;
+        if (smashAssets.geometries["wheel_slicks"]) {
+          let wTexUrl = "assets/textures/blackFullWheel.png";
+          if (wheelType === "gold") wTexUrl = "assets/textures/goldWheel.png";
+          else if (wheelType === "neon") wTexUrl = "assets/textures/blueWheel.png";
+          const wTex = loadPixelTexture(wTexUrl);
+          const wMat = new THREE.MeshStandardMaterial({ map: wTex, roughness: 0.4, metalness: 0.15 });
+          w = new THREE.Mesh(smashAssets.geometries["wheel_slicks"], wMat);
+          w.scale.set(0.85, 0.85, 0.85);
+          if (x > 0) w.rotation.y = Math.PI;
+        } else {
+          w = new THREE.Mesh(wheelGeo, tireMat);
+          const r = new THREE.Mesh(rimGeo, rimMat);
+          w.add(r);
+        }
         sGroup.add(w);
         group.add(sGroup);
         wheels.push(w);
@@ -6392,7 +6514,7 @@
        COMBATANT ENTITY WITH SMASH KARTS STRICT RULES
        ========================================================================== */
     class Combatant {
-      constructor(id, name, color, hat, chassis, wheels, trail, isBot = false, isRemote = false) {
+      constructor(id, name, color, hat, chassis, wheels, trail, isBot = false, isRemote = false, character = null) {
         this.id = id;
         this.name = name;
         this.color = color;
@@ -6402,6 +6524,7 @@
         this.trail = trail;
         this.isBot = isBot;
         this.isRemote = isRemote;
+        this.character = character || (isBot ? ["cat", "dog", "frog", "panda"][Math.floor(Math.random() * 4)] : (config.data.character || "cat"));
 
         this.hp = 100;
         this.smashes = 0;
@@ -6446,7 +6569,7 @@
         this.targetPos = new THREE.Vector3();
         this.targetHeading = 0;
 
-        this.meshData = buildKartMesh(color, hat, chassis, wheels, name);
+        this.meshData = buildKartMesh(color, hat, chassis, wheels, name, this.character);
         this.group = this.meshData.group;
         scene.add(this.group);
 
@@ -7805,7 +7928,8 @@
       config.data.wheels,
       config.data.trail,
       false,
-      false
+      false,
+      config.data.character
     );
     combatants.push(player);
 
@@ -7816,6 +7940,7 @@
         combatants.splice(i, 1);
       }
 
+      const smashAnimals = ["dog", "frog", "panda", "cat", "dog"];
       // Pick 5 randomized opponents from pool
       const shuffledNames = [...AUTHENTIC_NAMES].sort(() => 0.5 - Math.random());
       for (let i = 0; i < 5; i++) {
@@ -7833,7 +7958,8 @@
           "slicks",
           "flame",
           true,
-          false
+          false,
+          smashAnimals[i % smashAnimals.length]
         );
         combatants.push(bot);
       }
@@ -8019,6 +8145,7 @@
               box.respawnTimer = 7.5;
 
               spawnExplosionParticles(box.x, 1.8, box.z, 0xf59e0b, 16);
+              if (c === player) sound.playBoxPop();
               c.startWeaponRoll();
             }
           });
@@ -8225,7 +8352,7 @@
       player.name = config.data.username;
       player.color = config.data.color;
       scene.remove(player.group);
-      player.meshData = buildKartMesh(player.color, config.data.hat, config.data.chassis, config.data.wheels, player.name);
+      player.meshData = buildKartMesh(player.color, config.data.hat, config.data.chassis, config.data.wheels, player.name, config.data.character);
       player.group = player.meshData.group;
       scene.add(player.group);
 
@@ -9060,6 +9187,10 @@
     }
 
     function updateGarageSelectionUI() {
+      // Character chips
+      document.querySelectorAll("#characterSelector .chip-btn").forEach(c => {
+        c.classList.toggle("active", c.getAttribute("data-character") === config.data.character);
+      });
       // Chassis chips
       document.querySelectorAll("#chassisSelector .chip-btn").forEach(c => {
         c.classList.toggle("active", c.getAttribute("data-chassis") === config.data.chassis);
@@ -9085,9 +9216,12 @@
       // Re-render hero kart model in showcase if available
       if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
         scene.remove(player.group);
-        player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+        player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username, config.data.character);
         player.group = player.meshData.group;
         scene.add(player.group);
+        if (player.meshData.overhead && player.meshData.overhead.sprite) {
+          player.meshData.overhead.sprite.visible = false;
+        }
       }
     }
 
@@ -9715,13 +9849,17 @@
           if (typeof saveProfileToSupabase === "function") saveProfileToSupabase();
           if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
             scene.remove(player.group);
-            player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+            player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username, config.data.character);
             player.group = player.meshData.group;
             scene.add(player.group);
+            if (player.meshData.overhead && player.meshData.overhead.sprite) {
+              player.meshData.overhead.sprite.visible = false;
+            }
           }
         });
       });
     }
+    setupChips("characterSelector", "character");
     setupChips("chassisSelector", "chassis");
     setupChips("hatSelector", "hat");
     setupChips("wheelSelector", "wheels");
@@ -9736,7 +9874,7 @@
         if (typeof saveProfileToSupabase === "function") saveProfileToSupabase();
         if (player && typeof buildKartMesh === "function" && scene && gameState === "menu") {
           scene.remove(player.group);
-          player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username);
+          player.meshData = buildKartMesh(config.data.color, config.data.hat, config.data.chassis, config.data.wheels, config.data.username, config.data.character);
           player.group = player.meshData.group;
           scene.add(player.group);
         }

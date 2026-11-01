@@ -167,7 +167,10 @@ const server = http.createServer(async (req, res) => {
       ".png": "image/png",
       ".jpg": "image/jpeg",
       ".svg": "image/svg+xml",
-      ".ico": "image/x-icon"
+      ".ico": "image/x-icon",
+      ".obj": "text/plain",
+      ".ogg": "audio/ogg",
+      ".wav": "audio/wav"
     };
 
     const isHtml = ext === ".html";
